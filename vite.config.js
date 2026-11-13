@@ -15,6 +15,11 @@ export default defineConfig({
       optimizeDeps: { include: PREBUNDLE },
     },
   },
+  build: {
+    rolldownOptions: {
+      external: ["cloudflare:workers"],
+    },
+  },
   plugins: [
     base44({
       hmrNotifier: true,

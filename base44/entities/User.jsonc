@@ -7,6 +7,34 @@
         "admin",
         "user"
       ]
+    },
+    "channel_url": {
+      "type": "string",
+      "description": "Link to the user's main channel or social network (YouTube, TikTok, ...)"
+    },
+    "country": {
+      "type": "string",
+      "description": "Country the user lives in"
+    },
+    "referral_source": {
+      "type": "string",
+      "description": "How the user found NASETLINK",
+      "enum": [
+        "YouTube",
+        "TikTok",
+        "Discord",
+        "Recomendación",
+        "Otro"
+      ]
+    },
+    "whatsapp": {
+      "type": "string",
+      "description": "WhatsApp number including country dial code"
+    },
+    "terms_accepted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the user accepted the Terms and Privacy Policy"
     }
   },
   "required": [

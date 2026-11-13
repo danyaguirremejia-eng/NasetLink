@@ -1,7 +1,9 @@
 // Base44 managed file: error-capture v1. Keep it as it is; Base44 replaces it with newer versions.
 // It reports the app's server errors to Base44, so the app's owner sees them as alerts.
 import { getRequest, getResponseStatus } from "@tanstack/react-start/server";
-import { env, waitUntil } from "cloudflare:workers";
+import { waitUntil } from "@vercel/functions";
+
+const env = globalThis.process?.env ?? {};
 
 // Base44 sends it only on production requests of apps whose owner turned error reporting on.
 const FEED_CONTEXT_HEADER = "x-b44-feed-context";

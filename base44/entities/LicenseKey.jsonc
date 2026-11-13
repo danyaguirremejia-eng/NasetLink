@@ -1,0 +1,87 @@
+{
+  "name": "LicenseKey",
+  "type": "object",
+  "properties": {
+    "key_code": {
+      "type": "string",
+      "description": "C\u00f3digo completo de la licencia, por ejemplo PROTECT-VIP-A1B2C3D4."
+    },
+    "prefix": {
+      "type": "string",
+      "description": "Prefijo personalizado con el que se gener\u00f3 la Key."
+    },
+    "random_length": {
+      "type": "number",
+      "description": "Cantidad de caracteres aleatorios de la Key."
+    },
+    "duration_days": {
+      "type": "number",
+      "description": "Duraci\u00f3n de la licencia en d\u00edas."
+    },
+    "device_limit": {
+      "type": "number",
+      "description": "M\u00e1ximo de dispositivos permitidos. 0 significa ilimitado.",
+      "default": 1
+    },
+    "status": {
+      "type": "string",
+      "description": "Estado de la licencia.",
+      "enum": [
+        "active",
+        "expired",
+        "revoked"
+      ],
+      "enumColors": [
+        "green",
+        "yellow",
+        "red"
+      ],
+      "default": "active"
+    },
+    "delivered": {
+      "type": "boolean",
+      "description": "Indica si la Key ya fue mostrada en su p\u00e1gina de entrega.",
+      "default": false
+    },
+    "delivered_at": {
+      "type": "string",
+      "description": "Fecha y hora de la entrega en formato ISO."
+    },
+    "expires_at": {
+      "type": "string",
+      "description": "Fecha y hora de expiraci\u00f3n en formato ISO."
+    },
+    "devices": {
+      "type": "array",
+      "description": "Identificadores de los dispositivos que activaron la Key.",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "key_code"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

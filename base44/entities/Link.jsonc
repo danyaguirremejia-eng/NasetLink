@@ -1,0 +1,66 @@
+{
+  "name": "Link",
+  "type": "object",
+  "properties": {
+    "original_url": {
+      "type": "string",
+      "description": "La URL larga a la que redirige el enlace corto."
+    },
+    "short_code": {
+      "type": "string",
+      "description": "C\u00f3digo \u00fanico usado en /s/<codigo>."
+    },
+    "title": {
+      "type": "string",
+      "description": "T\u00edtulo opcional del enlace."
+    },
+    "clicks": {
+      "type": "number",
+      "description": "Cantidad de visitas completadas.",
+      "default": 0
+    },
+    "earnings": {
+      "type": "number",
+      "description": "Ganancias acumuladas en USD.",
+      "default": 0
+    }
+  },
+  "required": [
+    "original_url",
+    "short_code"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

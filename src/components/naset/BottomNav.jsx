@@ -121,14 +121,14 @@ export default function BottomNav() {
                 <p className="px-2 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Ganancias</p>
                 <div className="space-y-1">
                   <MenuButton icon={Banknote} text="Retiros" onClick={() => goTo("/retiros")} />
-                  <MenuButton icon={Users} text="Referidos" />
+                  <MenuButton icon={Users} text="Referidos" onClick={() => goTo("/referidos")} />
                 </div>
               </div>
 
               <div>
                 <p className="px-2 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Rendimiento</p>
                 <div className="space-y-1">
-                  <MenuButton icon={Trophy} text="Ranking" />
+                  <MenuButton icon={Trophy} text="Ranking" onClick={() => goTo("/ranking")} />
                   <MenuButton icon={Star} text="Niveles" />
                 </div>
               </div>

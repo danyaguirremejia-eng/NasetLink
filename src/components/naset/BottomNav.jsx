@@ -15,7 +15,6 @@ export default function BottomNav() {
   const path = location.pathname;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  // Correo de admin
   const ADMIN_EMAILS = ["danyxiter67@gmail.com"];
   const isAdmin = auth.currentUser && ADMIN_EMAILS.includes(auth.currentUser.email);
 
@@ -35,7 +34,6 @@ export default function BottomNav() {
 
   return (
     <>
-      {/* BARRA INFERIOR (5 Botones) */}
       <div className="fixed bottom-4 left-0 right-0 z-40 flex justify-center px-2 pb-safe pointer-events-none">
         <nav className="pointer-events-auto flex w-full max-w-[380px] items-center justify-around rounded-[2rem] border border-white/10 bg-[#0f1523]/60 px-1 py-2 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] backdrop-blur-xl">
           
@@ -80,7 +78,6 @@ export default function BottomNav() {
         </nav>
       </div>
 
-      {/* MENÚ DESPLEGABLE (3 PUNTITOS) */}
       {isMenuOpen && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm sm:items-center">
           <div className="absolute inset-0" onClick={() => setIsMenuOpen(false)}></div>
@@ -151,7 +148,6 @@ export default function BottomNav() {
                 </div>
               </div>
 
-              {/* ADMIN PANEL */}
               {isAdmin && (
                 <div>
                   <p className="px-2 mb-2 text-[10px] font-bold text-red-500/70 uppercase tracking-widest">Administración</p>

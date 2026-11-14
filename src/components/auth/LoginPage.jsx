@@ -9,7 +9,10 @@ import { auth, googleProvider } from "../../lib/firebase";
 import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 
 export function LoginPage() {
-  const returnTo = safeReturnTo();
+  // Tomamos la ruta de retorno, pero si no existe, vamos a /dashboard por defecto
+  const rawReturnTo = safeReturnTo();
+  const targetRoute = rawReturnTo && rawReturnTo !== "/login" ? rawReturnTo : "/dashboard";
+  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -20,9 +23,8 @@ export function LoginPage() {
     setError("");
     setBusy(true);
     try {
-      // Iniciar sesión con Firebase
       await signInWithEmailAndPassword(auth, email, password);
-      window.location.href = returnTo;
+      window.location.href = targetRoute;
     } catch (err) {
       console.error(err);
       if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password') {
@@ -41,10 +43,11 @@ export function LoginPage() {
     setBusy(true);
     try {
       await signInWithPopup(auth, googleProvider);
-      window.location.href = returnTo;
+      // Forzamos la recarga de la página en la ruta del dashboard
+      window.location.href = "/dashboard";
     } catch (err) {
       console.error(err);
-      setError("Error al conectar con Google.");
+      setError(err.message || "Error al conectar con Google.");
       setBusy(false);
     }
   }
@@ -52,7 +55,6 @@ export function LoginPage() {
   return (
     <AuthLayout icon={LogIn} title="Bienvenido de nuevo" subtitle="Inicia sesión en tu cuenta">
       
-      {/* Botón de Google personalizado con Firebase */}
       <button 
         type="button"
         onClick={handleGoogleLogin} 
@@ -69,7 +71,6 @@ export function LoginPage() {
       </button>
       
       <OrDivider />
-      
       <AuthError>{error}</AuthError>
       
       <form onSubmit={submit} className="space-y-4">
@@ -83,7 +84,7 @@ export function LoginPage() {
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label htmlFor="login-password">Contraseña</Label>
-            <AuthLink to="/forgot-password" returnTo={returnTo} className="text-xs text-primary hover:underline">
+            <AuthLink to="/forgot-password" returnTo={targetRoute} className="text-xs text-primary hover:underline">
               ¿Olvidaste tu contraseña?
             </AuthLink>
           </div>
@@ -99,7 +100,7 @@ export function LoginPage() {
       
       <p className="mt-6 text-center text-sm text-muted-foreground">
         ¿No tienes una cuenta?{" "}
-        <AuthLink to="/register" returnTo={returnTo}>
+        <AuthLink to="/register" returnTo={targetRoute}>
           Crea una ahora
         </AuthLink>
       </p>

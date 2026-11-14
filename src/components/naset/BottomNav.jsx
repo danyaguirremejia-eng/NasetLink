@@ -138,16 +138,16 @@ export default function BottomNav() {
                 <div className="space-y-1">
                   <MenuButton icon={Megaphone} text="Anuncios" onClick={() => goTo("/anuncios")} />
                   <MenuButton icon={Lightbulb} text="Muro de ideas" onClick={() => goTo("/sugerencias")} />
-                  <MenuButton icon={HelpCircle} text="Ayuda" />
+                  <MenuButton icon={HelpCircle} text="Ayuda" onClick={() => goTo("/ayuda")} />
                   <MenuButton icon={Headphones} text="Soporte" onClick={() => goTo("/soporte")} />
-                  <MenuButton icon={User} text="Perfil" />
+                  <MenuButton icon={User} text="Perfil" onClick={() => goTo("/perfil")} />
                 </div>
               </div>
 
               <div>
                 <p className="px-2 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Comunidad</p>
                 <div className="space-y-1">
-                  <MenuButton icon={MessageCircle} text="Chat en vivo" />
+                  <MenuButton icon={MessageCircle} text="Chat en vivo" onClick={() => goTo("/chat")} />
                 </div>
               </div>
 

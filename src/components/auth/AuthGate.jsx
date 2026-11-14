@@ -1,31 +1,22 @@
 import { redirect } from "@tanstack/react-router";
 import { DefaultCatchBoundary } from "@/components/DefaultCatchBoundary";
 import { auth } from "@/lib/firebase";
-import { onAuthStateChanged } from "firebase/auth";
 
-/**
- * El guardián ahora usa Firebase para verificar si el usuario está logueado.
- * Usamos una Promesa con onAuthStateChanged para evitar que el usuario sea
- * redirigido al login mientras Firebase está cargando la sesión inicial.
- */
 export async function requireSignedIn({ location }) {
-  const user = await new Promise((resolve) => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      unsubscribe();
-      resolve(currentUser);
-    });
-  });
+  // Esta función espera OBLIGATORIAMENTE a que Firebase lea la sesión del celular
+  await auth.authStateReady();
+  
+  const user = auth.currentUser;
 
   if (user) {
-    // Si hay usuario, lo pasamos al contexto para que el Dashboard lo use
+    // Si hay usuario, lo pasamos al contexto
     return { user };
-  }
-
-  // Si no hay usuario, lo mandamos al login guardando la ruta a la que quería ir
+  } 
+  
+  // Si de verdad no hay sesión, mandamos al login sin forzar recarga bruta
   throw redirect({
     to: "/login",
     search: { returnTo: location.href, from_url: location.href },
-    reloadDocument: true,
   });
 }
 

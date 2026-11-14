@@ -1,123 +1,52 @@
-import { useState } from "react";
-import { Link } from "@tanstack/react-router";
-import { Shield, BarChart3, MessageCircle, User } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-
-const shell =
-  "liquid inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-xs font-semibold tracking-wide whitespace-nowrap";
-
-const FAQ = [
-  {
-    q: "¿Cuándo se acreditan mis ganancias?",
-    a: "Las ganancias se suman a tu saldo en el momento en que un visitante completa el temporizador del enlace.",
-  },
-  {
-    q: "¿Cuál es el retiro mínimo?",
-    a: "El mínimo para solicitar un pago por PayPal es de $5.00 USD.",
-  },
-  {
-    q: "¿Cómo subo de nivel?",
-    a: "Cada nivel desbloquea anuncios más largos y mejor pago por cada 1000 clics. Se avanza con clics válidos acumulados.",
-  },
-];
+import { useState, useEffect } from "react";
+import { Clock, MessageCircle, Bell, Flame } from "lucide-react";
 
 export default function TopBar() {
-  const [modeOpen, setModeOpen] = useState(false);
-  const [chatOpen, setChatOpen] = useState(false);
+  const [time, setTime] = useState(new Date());
+
+  useEffect(() => {
+    // Actualiza la hora cada minuto
+    const timer = setInterval(() => setTime(new Date()), 60000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formattedTime = time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
   return (
-    <header className="flex flex-wrap items-center gap-2.5">
-      <button type="button" onClick={() => setModeOpen(true)} className={`${shell} text-white`}>
-        <Shield className="h-4 w-4 text-[#00f0ff]" strokeWidth={2.2} />
-        Modo
-      </button>
+    <div className="flex w-full items-center justify-between">
+      
+      {/* Racha */}
+      <div className="flex items-center gap-1.5 bg-blue-500/10 border border-blue-500/20 px-3 py-1.5 rounded-full text-xs font-semibold text-blue-400">
+        <Flame className="w-3.5 h-3.5" />
+        <span>Racha 0/9</span>
+      </div>
 
-      <Link
-        to="/ganancias"
-        className={`${shell} border-emerald-200/40 text-emerald-950`}
-        style={{
-          background: "linear-gradient(140deg, #6ef2a4 0%, #22d17a 100%)",
-          backdropFilter: "blur(10px)",
-          boxShadow: "inset 0 1px 0 rgba(255,255,255,.55), 0 10px 26px -10px rgba(34,209,122,.9)",
-        }}
-      >
-        <BarChart3 className="h-4 w-4" strokeWidth={2.4} />
-        Estado
-      </Link>
+      {/* Iconos de la derecha */}
+      <div className="flex items-center gap-2">
+        
+        {/* Reloj */}
+        <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-300 bg-white/5 px-2.5 py-1.5 rounded-full border border-white/5">
+          <Clock className="w-3.5 h-3.5 text-blue-400" />
+          <span>{formattedTime}</span>
+        </div>
 
-      <button
-        type="button"
-        onClick={() => setChatOpen(true)}
-        className={`${shell} border-white/70 text-slate-900`}
-        style={{
-          background: "linear-gradient(140deg, #ffffff 0%, #e8f1ff 100%)",
-          boxShadow: "inset 0 1px 0 rgba(255,255,255,.9), 0 10px 26px -12px rgba(255,255,255,.8)",
-        }}
-      >
-        <MessageCircle className="h-4 w-4 text-[#3b82f6]" strokeWidth={2.4} />
-        Chat
-      </button>
+        {/* Chat */}
+        <button className="relative p-1.5 text-slate-400 hover:text-white transition bg-white/5 rounded-full border border-white/5">
+          <MessageCircle className="w-4 h-4" />
+          <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+        </button>
 
-      <Link
-        to="/perfil"
-        className={`${shell} text-[#04141a]`}
-        style={{
-          background: "linear-gradient(140deg, #7bfaff 0%, #00f0ff 55%, #33b7ff 100%)",
-          boxShadow: "inset 0 1px 0 rgba(255,255,255,.7), 0 10px 28px -8px rgba(0,240,255,.85)",
-        }}
-      >
-        <User className="h-4 w-4" strokeWidth={2.6} />
-        Mi Perfil
-      </Link>
+        {/* Notificaciones */}
+        <button className="p-1.5 text-slate-400 hover:text-white transition bg-white/5 rounded-full border border-white/5">
+          <Bell className="w-4 h-4" />
+        </button>
 
-      <Dialog open={modeOpen} onOpenChange={setModeOpen}>
-        <DialogContent className="border-white/10 bg-[#0d1626] text-slate-100">
-          <DialogHeader>
-            <DialogTitle className="font-heading text-lg">Modo de anuncios</DialogTitle>
-            <DialogDescription className="text-slate-400">
-              Estás en el Nivel 2 · anuncios de 10 segundos · $1.00 por cada 1000 clics.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-3 text-sm text-slate-300">
-            <p>
-              Los niveles más altos pagan más por clic, pero el visitante debe esperar más segundos antes
-              de continuar a la descarga.
-            </p>
-            <Link
-              to="/ganancias"
-              onClick={() => setModeOpen(false)}
-              className="inline-flex items-center rounded-full bg-[#00f0ff] px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#04141a]"
-            >
-              Ver todos los niveles
-            </Link>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={chatOpen} onOpenChange={setChatOpen}>
-        <DialogContent className="border-white/10 bg-[#0d1626] text-slate-100">
-          <DialogHeader>
-            <DialogTitle className="font-heading text-lg">Chat de soporte</DialogTitle>
-            <DialogDescription className="text-slate-400">
-              Respuestas rápidas a las dudas más comunes.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-3">
-            {FAQ.map((item) => (
-              <div key={item.q} className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
-                <p className="text-sm font-semibold text-white">{item.q}</p>
-                <p className="mt-1 text-xs leading-relaxed text-slate-400">{item.a}</p>
-              </div>
-            ))}
-          </div>
-        </DialogContent>
-      </Dialog>
-    </header>
+        {/* Avatar */}
+        <div className="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-xs font-bold text-white border border-white/10 uppercase">
+          D
+        </div>
+        
+      </div>
+    </div>
   );
 }

@@ -1,11 +1,9 @@
 import { useState, useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { toast } from "sonner";
-import ShortenCard from "@/components/naset/ShortenCard";
 import LinksTable from "@/components/naset/LinksTable";
-import ShortLinkResult from "@/components/naset/ShortLinkResult";
 import { db } from "@/lib/firebase";
-import { collection, query, where, getDocs, addDoc, serverTimestamp, doc, getDoc, setDoc } from "firebase/firestore";
+import { collection, query, where, getDocs, doc, getDoc, setDoc } from "firebase/firestore";
 import { Clock, MessageCircle, TrendingUp, Wallet, Hourglass, Award, Gift, Copy, X, Flame } from "lucide-react";
 
 export const Route = createFileRoute("/_authed/dashboard")({
@@ -21,9 +19,6 @@ export const Route = createFileRoute("/_authed/dashboard")({
 function DashboardPage() {
   const { user } = Route.useRouteContext();
 
-  const [url, setUrl] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [created, setCreated] = useState(null);
   const [links, setLinks] = useState([]);
   const [balance, setBalance] = useState(0);
   const [totalClicks, setTotalClicks] = useState(0);
@@ -79,35 +74,6 @@ function DashboardPage() {
   useEffect(() => {
     fetchData();
   }, [user]);
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    if (!url.trim() || loading) return;
-    setLoading(true);
-    try {
-      const chars = "abcdefghijkmnpqrstuvwxyz23456789";
-      let code = "";
-      for (let i = 0; i < 7; i++) code += chars[Math.floor(Math.random() * chars.length)];
-
-      const docRef = await addDoc(collection(db, "links"), {
-        original_url: url,
-        short_code: code,
-        clicks: 0,
-        earnings: 0,
-        userId: user.uid,
-        createdAt: serverTimestamp()
-      });
-
-      const newLink = { id: docRef.id, original_url: url, short_code: code, clicks: 0, earnings: 0 };
-      setCreated(newLink);
-      setUrl("");
-      fetchData();
-    } catch (error) {
-      toast.error(error?.message || "No se pudo acortar el enlace");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleCopy = async (text) => {
     try {
@@ -195,9 +161,6 @@ function DashboardPage() {
         </h1>
         <p className="text-slate-400 text-sm mt-1">Este es el pulso de tu cuenta.</p>
       </div>
-
-      <ShortLinkResult link={created} />
-      <ShortenCard url={url} onUrlChange={setUrl} onSubmit={handleSubmit} loading={loading} />
 
       <div>
         <div className="flex items-center gap-2 mb-3">

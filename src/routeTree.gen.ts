@@ -19,6 +19,8 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthedAdminRouteImport } from './routes/_authed/admin'
 import { Route as AuthedAnunciosRouteImport } from './routes/_authed/anuncios'
 import { Route as AuthedApiRouteImport } from './routes/_authed/api'
+import { Route as AuthedAyudaRouteImport } from './routes/_authed/ayuda'
+import { Route as AuthedChatRouteImport } from './routes/_authed/chat'
 import { Route as AuthedDashboardRouteImport } from './routes/_authed/dashboard'
 import { Route as AuthedGananciasRouteImport } from './routes/_authed/ganancias'
 import { Route as AuthedKeysRouteImport } from './routes/_authed/keys'
@@ -29,6 +31,7 @@ import { Route as AuthedPersonalizaRouteImport } from './routes/_authed/personal
 import { Route as AuthedRankingRouteImport } from './routes/_authed/ranking'
 import { Route as AuthedReferidosRouteImport } from './routes/_authed/referidos'
 import { Route as AuthedRetirosRouteImport } from './routes/_authed/retiros'
+import { Route as AuthedSoporteRouteImport } from './routes/_authed/soporte'
 import { Route as AuthedStatsRouteImport } from './routes/_authed/stats'
 import { Route as AuthedSugerenciasRouteImport } from './routes/_authed/sugerencias'
 import { Route as ApiTimeRouteImport } from './routes/api/time'
@@ -85,6 +88,16 @@ const AuthedApiRoute = AuthedApiRouteImport.update({
   path: '/api',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedAyudaRoute = AuthedAyudaRouteImport.update({
+  id: '/ayuda',
+  path: '/ayuda',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedChatRoute = AuthedChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
+  getParentRoute: () => AuthedRoute,
+} as any)
 const AuthedDashboardRoute = AuthedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -135,6 +148,11 @@ const AuthedRetirosRoute = AuthedRetirosRouteImport.update({
   path: '/retiros',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedSoporteRoute = AuthedSoporteRouteImport.update({
+  id: '/soporte',
+  path: '/soporte',
+  getParentRoute: () => AuthedRoute,
+} as any)
 const AuthedStatsRoute = AuthedStatsRouteImport.update({
   id: '/stats',
   path: '/stats',
@@ -176,6 +194,8 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthedAdminRoute
   '/anuncios': typeof AuthedAnunciosRoute
   '/api': typeof AuthedApiRoute
+  '/ayuda': typeof AuthedAyudaRoute
+  '/chat': typeof AuthedChatRoute
   '/dashboard': typeof AuthedDashboardRoute
   '/ganancias': typeof AuthedGananciasRoute
   '/keys': typeof AuthedKeysRoute
@@ -186,6 +206,7 @@ export interface FileRoutesByFullPath {
   '/ranking': typeof AuthedRankingRoute
   '/referidos': typeof AuthedReferidosRoute
   '/retiros': typeof AuthedRetirosRoute
+  '/soporte': typeof AuthedSoporteRoute
   '/stats': typeof AuthedStatsRoute
   '/sugerencias': typeof AuthedSugerenciasRoute
   '/api/time': typeof ApiTimeRoute
@@ -203,6 +224,8 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthedAdminRoute
   '/anuncios': typeof AuthedAnunciosRoute
   '/api': typeof AuthedApiRoute
+  '/ayuda': typeof AuthedAyudaRoute
+  '/chat': typeof AuthedChatRoute
   '/dashboard': typeof AuthedDashboardRoute
   '/ganancias': typeof AuthedGananciasRoute
   '/keys': typeof AuthedKeysRoute
@@ -213,6 +236,7 @@ export interface FileRoutesByTo {
   '/ranking': typeof AuthedRankingRoute
   '/referidos': typeof AuthedReferidosRoute
   '/retiros': typeof AuthedRetirosRoute
+  '/soporte': typeof AuthedSoporteRoute
   '/stats': typeof AuthedStatsRoute
   '/sugerencias': typeof AuthedSugerenciasRoute
   '/api/time': typeof ApiTimeRoute
@@ -232,6 +256,8 @@ export interface FileRoutesById {
   '/_authed/admin': typeof AuthedAdminRoute
   '/_authed/anuncios': typeof AuthedAnunciosRoute
   '/_authed/api': typeof AuthedApiRoute
+  '/_authed/ayuda': typeof AuthedAyudaRoute
+  '/_authed/chat': typeof AuthedChatRoute
   '/_authed/dashboard': typeof AuthedDashboardRoute
   '/_authed/ganancias': typeof AuthedGananciasRoute
   '/_authed/keys': typeof AuthedKeysRoute
@@ -242,6 +268,7 @@ export interface FileRoutesById {
   '/_authed/ranking': typeof AuthedRankingRoute
   '/_authed/referidos': typeof AuthedReferidosRoute
   '/_authed/retiros': typeof AuthedRetirosRoute
+  '/_authed/soporte': typeof AuthedSoporteRoute
   '/_authed/stats': typeof AuthedStatsRoute
   '/_authed/sugerencias': typeof AuthedSugerenciasRoute
   '/api/time': typeof ApiTimeRoute
@@ -261,6 +288,8 @@ export interface FileRouteTypes {
     | '/admin'
     | '/anuncios'
     | '/api'
+    | '/ayuda'
+    | '/chat'
     | '/dashboard'
     | '/ganancias'
     | '/keys'
@@ -271,6 +300,7 @@ export interface FileRouteTypes {
     | '/ranking'
     | '/referidos'
     | '/retiros'
+    | '/soporte'
     | '/stats'
     | '/sugerencias'
     | '/api/time'
@@ -288,6 +318,8 @@ export interface FileRouteTypes {
     | '/admin'
     | '/anuncios'
     | '/api'
+    | '/ayuda'
+    | '/chat'
     | '/dashboard'
     | '/ganancias'
     | '/keys'
@@ -298,6 +330,7 @@ export interface FileRouteTypes {
     | '/ranking'
     | '/referidos'
     | '/retiros'
+    | '/soporte'
     | '/stats'
     | '/sugerencias'
     | '/api/time'
@@ -316,6 +349,8 @@ export interface FileRouteTypes {
     | '/_authed/admin'
     | '/_authed/anuncios'
     | '/_authed/api'
+    | '/_authed/ayuda'
+    | '/_authed/chat'
     | '/_authed/dashboard'
     | '/_authed/ganancias'
     | '/_authed/keys'
@@ -326,6 +361,7 @@ export interface FileRouteTypes {
     | '/_authed/ranking'
     | '/_authed/referidos'
     | '/_authed/retiros'
+    | '/_authed/soporte'
     | '/_authed/stats'
     | '/_authed/sugerencias'
     | '/api/time'
@@ -420,6 +456,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedApiRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/ayuda': {
+      id: '/_authed/ayuda'
+      path: '/ayuda'
+      fullPath: '/ayuda'
+      preLoaderRoute: typeof AuthedAyudaRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/chat': {
+      id: '/_authed/chat'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof AuthedChatRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_authed/dashboard': {
       id: '/_authed/dashboard'
       path: '/dashboard'
@@ -490,6 +540,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedRetirosRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/soporte': {
+      id: '/_authed/soporte'
+      path: '/soporte'
+      fullPath: '/soporte'
+      preLoaderRoute: typeof AuthedSoporteRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_authed/stats': {
       id: '/_authed/stats'
       path: '/stats'
@@ -539,6 +596,8 @@ interface AuthedRouteChildren {
   AuthedAdminRoute: typeof AuthedAdminRoute
   AuthedAnunciosRoute: typeof AuthedAnunciosRoute
   AuthedApiRoute: typeof AuthedApiRoute
+  AuthedAyudaRoute: typeof AuthedAyudaRoute
+  AuthedChatRoute: typeof AuthedChatRoute
   AuthedDashboardRoute: typeof AuthedDashboardRoute
   AuthedGananciasRoute: typeof AuthedGananciasRoute
   AuthedKeysRoute: typeof AuthedKeysRoute
@@ -549,6 +608,7 @@ interface AuthedRouteChildren {
   AuthedRankingRoute: typeof AuthedRankingRoute
   AuthedReferidosRoute: typeof AuthedReferidosRoute
   AuthedRetirosRoute: typeof AuthedRetirosRoute
+  AuthedSoporteRoute: typeof AuthedSoporteRoute
   AuthedStatsRoute: typeof AuthedStatsRoute
   AuthedSugerenciasRoute: typeof AuthedSugerenciasRoute
 }
@@ -557,6 +617,8 @@ const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedAdminRoute: AuthedAdminRoute,
   AuthedAnunciosRoute: AuthedAnunciosRoute,
   AuthedApiRoute: AuthedApiRoute,
+  AuthedAyudaRoute: AuthedAyudaRoute,
+  AuthedChatRoute: AuthedChatRoute,
   AuthedDashboardRoute: AuthedDashboardRoute,
   AuthedGananciasRoute: AuthedGananciasRoute,
   AuthedKeysRoute: AuthedKeysRoute,
@@ -567,6 +629,7 @@ const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedRankingRoute: AuthedRankingRoute,
   AuthedReferidosRoute: AuthedReferidosRoute,
   AuthedRetirosRoute: AuthedRetirosRoute,
+  AuthedSoporteRoute: AuthedSoporteRoute,
   AuthedStatsRoute: AuthedStatsRoute,
   AuthedSugerenciasRoute: AuthedSugerenciasRoute,
 }

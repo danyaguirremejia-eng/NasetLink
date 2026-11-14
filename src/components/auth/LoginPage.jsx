@@ -12,7 +12,11 @@ import { signInWithEmailAndPassword, signInWithPopup, setPersistence, browserLoc
 export function LoginPage() {
   const navigate = useNavigate();
   const rawReturnTo = safeReturnTo();
-  const targetRoute = rawReturnTo && rawReturnTo !== "/login" ? rawReturnTo : "/dashboard";
+  
+  // CORRECCIÓN: Si es "/" o "/login", lo forzamos al dashboard
+  const targetRoute = (rawReturnTo && rawReturnTo !== "/" && rawReturnTo !== "/login") 
+    ? rawReturnTo 
+    : "/dashboard";
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,7 +32,6 @@ export function LoginPage() {
       await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
       await signInWithEmailAndPassword(auth, email, password);
       
-      // Pequeño delay para que el AuthContext de React se actualice antes de navegar
       setTimeout(() => {
         navigate({ to: targetRoute });
       }, 500);

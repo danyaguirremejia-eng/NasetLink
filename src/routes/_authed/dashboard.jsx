@@ -5,7 +5,7 @@ import ShortenCard from "@/components/naset/ShortenCard";
 import LinksTable from "@/components/naset/LinksTable";
 import ShortLinkResult from "@/components/naset/ShortLinkResult";
 import { db } from "@/lib/firebase";
-import { collection, query, where, getDocs, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, query, where, getDocs, addDoc, serverTimestamp, doc, getDoc, setDoc } from "firebase/firestore";
 import { Clock, MessageCircle, TrendingUp, Wallet, Hourglass, Award, Gift, Copy, X, Flame } from "lucide-react";
 
 export const Route = createFileRoute("/_authed/dashboard")({
@@ -32,10 +32,16 @@ function DashboardPage() {
   
   const [showPromo, setShowPromo] = useState(true);
 
+  // Estados para la meta
+  const [meta, setMeta] = useState(0);
+  const [showMetaModal, setShowMetaModal] = useState(false);
+  const [metaInput, setMetaInput] = useState("");
+
   const fetchData = async () => {
     if (!user) return;
     setLoadingData(true);
     try {
+      // 1. Cargar enlaces
       const q = query(collection(db, "links"), where("userId", "==", user.uid));
       const querySnapshot = await getDocs(q);
 
@@ -54,9 +60,17 @@ function DashboardPage() {
       setTotalClicks(tClicks);
       setTotalEarnings(tEarnings);
       setBalance(tEarnings);
+
+      // 2. Cargar meta del usuario
+      const userRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userRef);
+      if (userSnap.exists() && userSnap.data().metaMensual) {
+        setMeta(userSnap.data().metaMensual);
+      }
+
     } catch (error) {
       console.error("Error al cargar datos:", error);
-      toast.error("No se pudieron cargar tus enlaces");
+      toast.error("No se pudieron cargar los datos");
     } finally {
       setLoadingData(false);
     }
@@ -104,6 +118,20 @@ function DashboardPage() {
     }
   };
 
+  const handleSaveMeta = async () => {
+    const val = Number(metaInput);
+    if (!val || val <= 0) return toast.error("Ingresa un valor válido");
+    try {
+      await setDoc(doc(db, "users", user.uid), { metaMensual: val }, { merge: true });
+      setMeta(val);
+      setShowMetaModal(false);
+      setMetaInput("");
+      toast.success("¡Meta guardada!");
+    } catch (err) {
+      toast.error("Error al guardar la meta");
+    }
+  };
+
   const getSaludo = () => {
     const hora = new Date().getHours();
     if (hora >= 6 && hora < 12) return "Buenos días";
@@ -112,15 +140,35 @@ function DashboardPage() {
   };
 
   const nombreUsuario = user?.displayName?.split(" ")[0] || user?.email?.split("@")[0] || "Usuario";
+  const domain = window.location.origin;
 
   if (loadingData) {
     return <div className="text-center text-white mt-10 font-bold">Cargando NASETLINK...</div>;
   }
 
   return (
-    <div className="space-y-6 pb-6">
+    <div className="space-y-6 pb-6 relative">
       
-      {/* Promo Banner */}
+      {showMetaModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-[#0F1523] border border-white/10 rounded-3xl p-6 w-full max-w-sm shadow-2xl">
+            <h3 className="text-xl font-bold text-white mb-2">Definir meta</h3>
+            <p className="text-sm text-slate-400 mb-4">¿Cuál es tu meta de ganancias este mes? (USD)</p>
+            <input 
+              type="number" 
+              value={metaInput}
+              onChange={(e) => setMetaInput(e.target.value)}
+              placeholder="Ej. 50"
+              className="w-full bg-black/30 border border-white/10 rounded-xl p-3 text-white mb-6 outline-none focus:border-blue-500"
+            />
+            <div className="flex gap-3">
+              <button onClick={() => setShowMetaModal(false)} className="flex-1 py-3 text-sm font-bold text-slate-300 bg-white/5 hover:bg-white/10 rounded-xl transition">Cancelar</button>
+              <button onClick={handleSaveMeta} className="flex-1 py-3 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition">Aceptar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showPromo && (
         <div className="relative bg-[#0F1523] border border-green-500/20 rounded-2xl p-4 flex items-start gap-4">
           <div className="bg-green-500/10 p-2 rounded-xl text-green-500 shrink-0">
@@ -141,7 +189,6 @@ function DashboardPage() {
         </div>
       )}
 
-      {/* Greeting */}
       <div>
         <h1 className="text-3xl font-black tracking-tight text-white">
           {getSaludo()}, {nombreUsuario} 👋
@@ -149,18 +196,15 @@ function DashboardPage() {
         <p className="text-slate-400 text-sm mt-1">Este es el pulso de tu cuenta.</p>
       </div>
 
-      {/* Formulario real para crear enlaces */}
       <ShortLinkResult link={created} />
       <ShortenCard url={url} onUrlChange={setUrl} onSubmit={handleSubmit} loading={loading} />
 
-      {/* Resumen */}
       <div>
         <div className="flex items-center gap-2 mb-3">
           <div className="w-1 h-4 bg-blue-500 rounded-full"></div>
           <h2 className="font-bold text-lg text-white">Resumen</h2>
         </div>
 
-        {/* Balance Card */}
         <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-3xl p-5 shadow-lg relative overflow-hidden mb-4">
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
           <div className="flex justify-between items-start mb-4">
@@ -187,7 +231,6 @@ function DashboardPage() {
         </div>
       </div>
       
-      {/* Pending */}
       <div className="bg-[#0F1523] border border-white/5 rounded-2xl p-5 flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2 text-slate-400 mb-1">
@@ -203,7 +246,6 @@ function DashboardPage() {
         </div>
       </div>
 
-      {/* Level Card */}
       <div className="bg-[#0F1523] border border-white/5 rounded-2xl p-5">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">
@@ -250,7 +292,6 @@ function DashboardPage() {
         </div>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-4 gap-2 bg-[#0F1523] p-1 rounded-xl border border-white/5">
         {['Hoy', 'Ayer', 'Este mes', 'Mes ant.'].map((tab, i) => (
           <button key={tab} className={`py-2 text-[11px] font-semibold rounded-lg ${i === 0 ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'}`}>
@@ -277,21 +318,29 @@ function DashboardPage() {
         </div>
       </div>
 
-      {/* Tabla de enlaces real */}
-      <LinksTable links={links} onCopy={() => handleCopy(`${window.location.origin}/s/${links.short_code}`)} />
+      <LinksTable links={links} onCopy={() => handleCopy(`${domain}/s/${links.short_code}`)} />
 
-      {/* Meta Section */}
       <div className="bg-[#0F1523] border border-white/5 rounded-2xl p-6 text-center">
         <div className="flex items-center justify-center gap-2 mb-4">
           <div className="bg-blue-500/10 p-2 rounded-xl"><TrendingUp className="w-5 h-5 text-blue-500" /></div>
           <h3 className="font-bold text-lg text-white">Meta del mes</h3>
         </div>
-        <p className="text-sm text-slate-400 mb-2">Define tu meta del mes</p>
-        <p className="text-xs text-slate-500 mb-4">Sugerida: <strong className="text-slate-300">$5.00</strong> (un 25% más que tu mes pasado)</p>
-        <button className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 px-6 rounded-xl transition">Poner meta</button>
+        
+        {meta > 0 ? (
+          <div className="mb-4">
+            <p className="text-sm text-slate-400 mb-1">Tu meta actual</p>
+            <p className="text-3xl font-black text-blue-500">${meta.toFixed(2)}</p>
+            <button onClick={() => { setMetaInput(meta); setShowMetaModal(true); }} className="mt-3 text-xs text-slate-400 hover:text-white underline">Editar meta</button>
+          </div>
+        ) : (
+          <>
+            <p className="text-sm text-slate-400 mb-2">Define tu meta del mes</p>
+            <p className="text-xs text-slate-500 mb-4">Sugerida: <strong className="text-slate-300">$5.00</strong> (un 25% más que tu mes pasado)</p>
+            <button onClick={() => setShowMetaModal(true)} className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 px-6 rounded-xl transition">Poner meta</button>
+          </>
+        )}
       </div>
 
-      {/* Invita y gana */}
       <div className="bg-[#0F1523] border border-white/5 rounded-2xl p-4 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="bg-pink-500/10 p-2.5 rounded-xl text-pink-500">
@@ -303,11 +352,15 @@ function DashboardPage() {
           </div>
         </div>
         <button 
-          onClick={() => handleCopy(`${window.location.origin}/register?ref=${user?.uid}`)}
-          className="bg-white/10 hover:bg-white/20 text-white p-2.5 rounded-lg transition flex items-center gap-2 text-xs font-bold"
+          onClick={() => handleCopy(`${domain}/register?ref=${user?.uid}`)}
+          className="bg-white/10 hover:bg-white/20 text-white p-2.5 rounded-lg transition flex items-center gap-2 text-xs font-bold shrink-0"
         >
           <Copy className="w-4 h-4" /> Copiar
         </button>
+      </div>
+      
+      <div className="text-center text-[10px] text-slate-600 font-mono pb-4">
+        NASETLINK build 32
       </div>
 
     </div>

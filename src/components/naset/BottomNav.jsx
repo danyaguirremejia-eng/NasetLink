@@ -6,7 +6,7 @@ import {
   Home, Zap, BarChart2, MoreHorizontal, X, 
   Key, Code, Palette, Banknote, Users, 
   Trophy, Star, Megaphone, Lightbulb, HelpCircle, 
-  Headphones, User, MessageCircle, LogOut, ChevronRight 
+  Headphones, User, MessageCircle, LogOut, ChevronRight, ShieldAlert
 } from "lucide-react";
 
 export default function BottomNav() {
@@ -14,6 +14,10 @@ export default function BottomNav() {
   const navigate = useNavigate();
   const path = location.pathname;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // 🔒 PON TU CORREO REAL DE FIREBASE AQUÍ PARA VER EL BOTÓN DE ADMIN
+  const ADMIN_EMAILS = ["danyxiter67@gmail.com"];
+  const isAdmin = auth.currentUser && ADMIN_EMAILS.includes(auth.currentUser.email);
 
   const handleLogout = async () => {
     try {
@@ -137,6 +141,24 @@ export default function BottomNav() {
                   <MenuButton icon={MessageCircle} text="Chat en vivo" />
                 </div>
               </div>
+
+              {/* 🔒 SECCIÓN DE ADMIN (Solo visible para ti) */}
+              {isAdmin && (
+                <div>
+                  <p className="px-2 mb-2 text-[10px] font-bold text-red-500/70 uppercase tracking-widest">Administración</p>
+                  <div className="space-y-1">
+                    <button onClick={() => goTo("/admin")} className="w-full flex items-center justify-between p-3 rounded-xl bg-red-500/5 hover:bg-red-500/10 border border-red-500/10 transition-colors text-red-400">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-red-500/10">
+                          <ShieldAlert className="w-4 h-4" />
+                        </div>
+                        <span className="font-medium text-sm">Admin Panel</span>
+                      </div>
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              )}
 
               <div className="pt-4 border-t border-white/5">
                 <button 

@@ -28,7 +28,10 @@ export function LoginPage() {
       await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
       await signInWithEmailAndPassword(auth, email, password);
       
-      navigate({ to: targetRoute });
+      // Pequeño delay para que el AuthContext de React se actualice antes de navegar
+      setTimeout(() => {
+        navigate({ to: targetRoute });
+      }, 500);
       
     } catch (err) {
       console.error(err);
@@ -50,7 +53,9 @@ export function LoginPage() {
       await setPersistence(auth, browserLocalPersistence);
       await signInWithPopup(auth, googleProvider);
       
-      navigate({ to: "/dashboard" });
+      setTimeout(() => {
+        navigate({ to: "/dashboard" });
+      }, 500);
       
     } catch (err) {
       console.error(err);

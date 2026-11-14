@@ -35,11 +35,10 @@ export default function BottomNav() {
 
   return (
     <>
-      {/* BARRA FLOTANTE */}
+      {/* BARRA INFERIOR (5 Botones) */}
       <div className="fixed bottom-4 left-0 right-0 z-40 flex justify-center px-2 pb-safe pointer-events-none">
         <nav className="pointer-events-auto flex w-full max-w-[380px] items-center justify-around rounded-[2rem] border border-white/10 bg-[#0f1523]/60 px-1 py-2 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] backdrop-blur-xl">
           
-          {/* Inicio */}
           <Link to="/dashboard" className={`flex flex-col items-center gap-1 transition-colors ${path === '/dashboard' ? 'text-blue-500' : 'text-slate-400 hover:text-slate-200'}`}>
             <div className={`flex h-10 w-10 items-center justify-center rounded-full transition-all duration-300 ${path === '/dashboard' ? 'bg-blue-600 text-white shadow-[0_0_20px_-3px_rgba(37,99,235,0.8)] scale-110' : ''}`}>
               <Home className="h-5 w-5" />
@@ -47,7 +46,6 @@ export default function BottomNav() {
             <span className={`text-[10px] font-semibold ${path === '/dashboard' ? 'text-blue-500' : 'text-slate-400'}`}>Inicio</span>
           </Link>
 
-          {/* Links */}
           <Link to="/links" className={`flex flex-col items-center gap-1 transition-colors ${path === '/links' ? 'text-blue-500' : 'text-slate-400 hover:text-slate-200'}`}>
             <div className={`flex h-10 w-10 items-center justify-center rounded-full transition-all duration-300 ${path === '/links' ? 'bg-blue-600 text-white shadow-[0_0_20px_-3px_rgba(37,99,235,0.8)] scale-110' : ''}`}>
               <Zap className="h-5 w-5" />
@@ -55,7 +53,6 @@ export default function BottomNav() {
             <span className={`text-[10px] font-semibold ${path === '/links' ? 'text-blue-500' : 'text-slate-400'}`}>Links</span>
           </Link>
 
-          {/* Stats */}
           <Link to="/stats" className={`flex flex-col items-center gap-1 transition-colors ${path === '/stats' ? 'text-blue-500' : 'text-slate-400 hover:text-slate-200'}`}>
             <div className={`flex h-10 w-10 items-center justify-center rounded-full transition-all duration-300 ${path === '/stats' ? 'bg-blue-600 text-white shadow-[0_0_20px_-3px_rgba(37,99,235,0.8)] scale-110' : ''}`}>
               <BarChart2 className="h-5 w-5" />
@@ -63,7 +60,6 @@ export default function BottomNav() {
             <span className={`text-[10px] font-semibold ${path === '/stats' ? 'text-blue-500' : 'text-slate-400'}`}>Stats</span>
           </Link>
 
-          {/* Retiros (El billete con las 2 flechas) */}
           <Link to="/retiros" className={`flex flex-col items-center gap-1 transition-colors ${path === '/retiros' ? 'text-blue-500' : 'text-slate-400 hover:text-slate-200'}`}>
             <div className={`flex h-10 w-10 items-center justify-center rounded-full transition-all duration-300 ${path === '/retiros' ? 'bg-blue-600 text-white shadow-[0_0_20px_-3px_rgba(37,99,235,0.8)] scale-110' : ''}`}>
               <ArrowRightLeft className="h-5 w-5" />
@@ -71,7 +67,6 @@ export default function BottomNav() {
             <span className={`text-[10px] font-semibold ${path === '/retiros' ? 'text-blue-500' : 'text-slate-400'}`}>Retiros</span>
           </Link>
 
-          {/* Más */}
           <button 
             type="button"
             onClick={() => setIsMenuOpen(true)}
@@ -85,7 +80,7 @@ export default function BottomNav() {
         </nav>
       </div>
 
-      {/* MENÚ DESPLEGABLE */}
+      {/* MENÚ DESPLEGABLE (3 PUNTITOS) */}
       {isMenuOpen && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm sm:items-center">
           <div className="absolute inset-0" onClick={() => setIsMenuOpen(false)}></div>
@@ -118,7 +113,7 @@ export default function BottomNav() {
                   <MenuButton icon={Zap} text="Crear enlace" onClick={() => goTo("/links")} />
                   <MenuButton icon={Key} text="Crear key" onClick={() => goTo("/keys")} />
                   <MenuButton icon={Code} text="API para desarrolladores" onClick={() => goTo("/api")} />
-                  <MenuButton icon={Palette} text="Mi página" />
+                  <MenuButton icon={Palette} text="Mi página" onClick={() => goTo("/personaliza")} />
                 </div>
               </div>
 

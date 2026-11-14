@@ -40,7 +40,8 @@ export function RegisterForm({ values, onChange, onSubmit, onGoogle, busy, error
       <button
         type="button"
         onClick={onGoogle}
-        className="flex h-12 w-full items-center justify-center gap-3 rounded-xl bg-white text-sm font-semibold text-slate-900 shadow-sm transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-[#0f172a]"
+        disabled={busy}
+        className="flex h-12 w-full items-center justify-center gap-3 rounded-xl bg-white text-sm font-semibold text-slate-900 shadow-sm transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-[#0f172a] disabled:opacity-50"
       >
         <GoogleIcon className="h-5 w-5" />
         Continuar con Google
@@ -148,6 +149,14 @@ export function RegisterForm({ values, onChange, onSubmit, onGoogle, busy, error
             <Link to="/" hash="privacidad" className="font-medium text-primary hover:underline">
               Política de Privacidad
             </Link>
+          </Label>
+        </div>
+
+        {/* NUEVO CHECKBOX DE RECUÉRDAME */}
+        <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.02] p-3">
+          <Checkbox id="reg-remember" checked={values.rememberMe} onCheckedChange={(v) => onChange("rememberMe", v === true)} disabled={busy} className="mt-0.5" />
+          <Label htmlFor="reg-remember" className="text-sm font-normal leading-relaxed text-slate-300 cursor-pointer select-none">
+            Recordar mi sesión (No aplica para Google)
           </Label>
         </div>
 

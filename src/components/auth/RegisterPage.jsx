@@ -5,7 +5,7 @@ import { RegisterForm } from "@/components/auth/register/RegisterForm";
 import { RegisterShell } from "@/components/auth/register/RegisterShell";
 import { countryByCode } from "@/components/auth/register/options";
 import { auth, googleProvider } from "../../lib/firebase";
-import { createUserWithEmailAndPassword, signInWithPopup, updateProfile } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithPopup, updateProfile, setPersistence, browserLocalPersistence, browserSessionPersistence } from "firebase/auth";
 
 const INITIAL = {
   fullName: "",
@@ -18,6 +18,7 @@ const INITIAL = {
   dialCountry: "MX",
   whatsapp: "",
   terms: false,
+  rememberMe: true, // <--- NUEVO CAMPO
 };
 
 function isHttpUrl(value) {
@@ -65,18 +66,16 @@ export function RegisterPage() {
     
     setBusy(true);
     try {
-      // 1. Crear usuario en Firebase Auth
+      await setPersistence(auth, values.rememberMe ? browserLocalPersistence : browserSessionPersistence);
+
       const userCredential = await createUserWithEmailAndPassword(auth, email, values.password);
       
-      // 2. Guardar el nombre en el perfil de Firebase
       await updateProfile(userCredential.user, {
         displayName: values.fullName.trim()
       });
 
-      // (Opcional) Aquí podrías guardar los datos extra como WhatsApp o canal en Firestore
-      
       toast.success("¡Cuenta creada con éxito!");
-      window.location.href = "/dashboard"; // Redirigir al panel principal
+      window.location.href = "/dashboard"; 
     } catch (err) {
       console.error(err);
       if (err.code === 'auth/email-already-in-use') {
@@ -93,6 +92,7 @@ export function RegisterPage() {
     setError("");
     setBusy(true);
     try {
+      await setPersistence(auth, browserLocalPersistence);
       await signInWithPopup(auth, googleProvider);
       toast.success("¡Bienvenido!");
       window.location.href = "/dashboard";

@@ -6,15 +6,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { safeReturnTo } from "@/lib/authReturnTo";
 import { auth, googleProvider } from "../../lib/firebase";
-import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import { signInWithEmailAndPassword, signInWithPopup, setPersistence, browserLocalPersistence, browserSessionPersistence } from "firebase/auth";
 
 export function LoginPage() {
-  // Tomamos la ruta de retorno, pero si no existe, vamos a /dashboard por defecto
   const rawReturnTo = safeReturnTo();
   const targetRoute = rawReturnTo && rawReturnTo !== "/login" ? rawReturnTo : "/dashboard";
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(true); 
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -23,6 +23,9 @@ export function LoginPage() {
     setError("");
     setBusy(true);
     try {
+      // Configurar la persistencia según el checkbox
+      await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
+      
       await signInWithEmailAndPassword(auth, email, password);
       window.location.href = targetRoute;
     } catch (err) {
@@ -42,8 +45,8 @@ export function LoginPage() {
     setError("");
     setBusy(true);
     try {
+      await setPersistence(auth, browserLocalPersistence);
       await signInWithPopup(auth, googleProvider);
-      // Forzamos la recarga de la página en la ruta del dashboard
       window.location.href = "/dashboard";
     } catch (err) {
       console.error(err);
@@ -56,9 +59,7 @@ export function LoginPage() {
     <AuthLayout icon={LogIn} title="Bienvenido de nuevo" subtitle="Inicia sesión en tu cuenta">
       
       <button 
-        type="button"
-        onClick={handleGoogleLogin} 
-        disabled={busy}
+        type="button" onClick={handleGoogleLogin} disabled={busy}
         className="flex w-full items-center justify-center gap-3 rounded-lg bg-white py-3 text-sm font-medium text-black transition-colors hover:bg-gray-100 disabled:opacity-50"
       >
         <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
@@ -93,6 +94,20 @@ export function LoginPage() {
             <Input id="login-password" type="password" autoComplete="current-password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10" />
           </div>
         </div>
+
+        <div className="flex items-center space-x-2 pt-2">
+          <input 
+            type="checkbox" 
+            id="rememberMe" 
+            checked={rememberMe}
+            onChange={(e) => setRememberMe(e.target.checked)}
+            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+          />
+          <label htmlFor="rememberMe" className="text-sm text-muted-foreground cursor-pointer select-none">
+            Recordar mi sesión
+          </label>
+        </div>
+
         <SubmitButton busy={busy} busyLabel="Iniciando...">
           Iniciar sesión
         </SubmitButton>

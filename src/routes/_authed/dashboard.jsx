@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import LinksTable from "@/components/naset/LinksTable";
 import { db } from "@/lib/firebase";
-import { collection, query, where, getDocs, doc, getDoc, setDoc } from "firebase/firestore";
-import { Clock, MessageCircle, TrendingUp, Wallet, Hourglass, Award, Gift, Copy, X, Flame } from "lucide-react";
+import { collection, query, where, getDocs, doc, onSnapshot } from "firebase/firestore";
+import { Clock, MessageCircle, TrendingUp, Wallet, Hourglass, Award, Gift, Copy, X, Flame, BadgeCheck, Star } from "lucide-react";
 
 export const Route = createFileRoute("/_authed/dashboard")({
   head: () => ({
@@ -18,6 +18,7 @@ export const Route = createFileRoute("/_authed/dashboard")({
 
 function DashboardPage() {
   const { user } = Route.useRouteContext();
+  const navigate = useNavigate();
 
   const [links, setLinks] = useState([]);
   const [balance, setBalance] = useState(0);
@@ -26,53 +27,52 @@ function DashboardPage() {
   const [loadingData, setLoadingData] = useState(true);
   
   const [showPromo, setShowPromo] = useState(true);
-
-  // Estados para la meta
-  const [meta, setMeta] = useState(0);
-  const [showMetaModal, setShowMetaModal] = useState(false);
-  const [metaInput, setMetaInput] = useState("");
-
-  const fetchData = async () => {
-    if (!user) return;
-    setLoadingData(true);
-    try {
-      // 1. Cargar enlaces
-      const q = query(collection(db, "links"), where("userId", "==", user.uid));
-      const querySnapshot = await getDocs(q);
-
-      let fetchedLinks = [];
-      let tClicks = 0;
-      let tEarnings = 0;
-
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        fetchedLinks.push({ id: doc.id, ...data });
-        tClicks += data.clicks || 0;
-        tEarnings += data.earnings || 0;
-      });
-
-      setLinks(fetchedLinks.reverse());
-      setTotalClicks(tClicks);
-      setTotalEarnings(tEarnings);
-      setBalance(tEarnings);
-
-      // 2. Cargar meta del usuario
-      const userRef = doc(db, "users", user.uid);
-      const userSnap = await getDoc(userRef);
-      if (userSnap.exists() && userSnap.data().metaMensual) {
-        setMeta(userSnap.data().metaMensual);
-      }
-
-    } catch (error) {
-      console.error("Error al cargar datos:", error);
-      toast.error("No se pudieron cargar los datos");
-    } finally {
-      setLoadingData(false);
-    }
-  };
+  
+  // Datos del usuario en tiempo real
+  const [userData, setUserData] = useState(null);
 
   useEffect(() => {
+    if (!user) return;
+
+    // 1. Escuchar datos del usuario en tiempo real (para nivel, verificado, etc)
+    const unsubUser = onSnapshot(doc(db, "users", user.uid), (docSnap) => {
+      if (docSnap.exists()) {
+        setUserData(docSnap.data());
+      }
+    });
+
+    // 2. Cargar enlaces
+    const fetchData = async () => {
+      setLoadingData(true);
+      try {
+        const q = query(collection(db, "links"), where("userId", "==", user.uid));
+        const querySnapshot = await getDocs(q);
+
+        let fetchedLinks = [];
+        let tClicks = 0;
+        let tEarnings = 0;
+
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          fetchedLinks.push({ id: doc.id, ...data });
+          tClicks += data.clicks || 0;
+          tEarnings += data.earnings || 0;
+        });
+
+        setLinks(fetchedLinks.reverse());
+        setTotalClicks(tClicks);
+        setTotalEarnings(tEarnings);
+        setBalance(tEarnings);
+      } catch (error) {
+        console.error("Error al cargar datos:", error);
+      } finally {
+        setLoadingData(false);
+      }
+    };
+
     fetchData();
+
+    return () => unsubUser();
   }, [user]);
 
   const handleCopy = async (text) => {
@@ -84,20 +84,6 @@ function DashboardPage() {
     }
   };
 
-  const handleSaveMeta = async () => {
-    const val = Number(metaInput);
-    if (!val || val <= 0) return toast.error("Ingresa un valor válido");
-    try {
-      await setDoc(doc(db, "users", user.uid), { metaMensual: val }, { merge: true });
-      setMeta(val);
-      setShowMetaModal(false);
-      setMetaInput("");
-      toast.success("¡Meta guardada!");
-    } catch (err) {
-      toast.error("Error al guardar la meta");
-    }
-  };
-
   const getSaludo = () => {
     const hora = new Date().getHours();
     if (hora >= 6 && hora < 12) return "Buenos días";
@@ -105,7 +91,10 @@ function DashboardPage() {
     return "Buenas noches";
   };
 
-  const nombreUsuario = user?.displayName?.split(" ")[0] || user?.email?.split("@")[0] || "Usuario";
+  const nombreUsuario = userData?.displayName?.split(" ")[0] || user?.displayName?.split(" ")[0] || user?.email?.split("@")[0] || "Usuario";
+  const userLevel = userData?.level || 1;
+  const isVerified = userData?.verified || false;
+  const isInfluencer = userData?.role === 'influencer';
   const domain = window.location.origin;
 
   if (loadingData) {
@@ -115,26 +104,6 @@ function DashboardPage() {
   return (
     <div className="space-y-6 pb-6 relative">
       
-      {showMetaModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-[#0F1523] border border-white/10 rounded-3xl p-6 w-full max-w-sm shadow-2xl">
-            <h3 className="text-xl font-bold text-white mb-2">Definir meta</h3>
-            <p className="text-sm text-slate-400 mb-4">¿Cuál es tu meta de ganancias este mes? (USD)</p>
-            <input 
-              type="number" 
-              value={metaInput}
-              onChange={(e) => setMetaInput(e.target.value)}
-              placeholder="Ej. 50"
-              className="w-full bg-black/30 border border-white/10 rounded-xl p-3 text-white mb-6 outline-none focus:border-blue-500"
-            />
-            <div className="flex gap-3">
-              <button onClick={() => setShowMetaModal(false)} className="flex-1 py-3 text-sm font-bold text-slate-300 bg-white/5 hover:bg-white/10 rounded-xl transition">Cancelar</button>
-              <button onClick={handleSaveMeta} className="flex-1 py-3 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition">Aceptar</button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {showPromo && (
         <div className="relative bg-[#0F1523] border border-green-500/20 rounded-2xl p-4 flex items-start gap-4">
           <div className="bg-green-500/10 p-2 rounded-xl text-green-500 shrink-0">
@@ -156,8 +125,10 @@ function DashboardPage() {
       )}
 
       <div>
-        <h1 className="text-3xl font-black tracking-tight text-white">
+        <h1 className="text-3xl font-black tracking-tight text-white flex items-center gap-2 flex-wrap">
           {getSaludo()}, {nombreUsuario} 👋
+          {isVerified && <BadgeCheck className="w-7 h-7 text-blue-500" title="Verificado" />}
+          {isInfluencer && <Star className="w-7 h-7 text-yellow-500" title="Influencer" />}
         </h1>
         <p className="text-slate-400 text-sm mt-1">Este es el pulso de tu cuenta.</p>
       </div>
@@ -175,7 +146,7 @@ function DashboardPage() {
               <Wallet className="w-4 h-4" />
               <span className="text-sm font-medium">Tu saldo</span>
             </div>
-            <span className="bg-white/20 text-white text-xs font-bold px-2.5 py-1 rounded-full backdrop-blur-sm">Noviembre</span>
+            <span className="bg-white/20 text-white text-xs font-bold px-2.5 py-1 rounded-full backdrop-blur-sm">Este mes</span>
           </div>
           <h3 className="text-5xl font-black mb-4">${balance.toFixed(2)}</h3>
           <div className="space-y-2 mb-6">
@@ -188,7 +159,10 @@ function DashboardPage() {
               <span className="font-semibold">${balance.toFixed(2)}</span>
             </div>
           </div>
-          <button className="bg-white text-blue-700 font-bold text-sm py-2 px-4 rounded-xl flex items-center gap-2 hover:bg-blue-50 transition">
+          <button 
+            onClick={() => navigate({ to: "/retiros" })}
+            className="bg-white text-blue-700 font-bold text-sm py-2 px-4 rounded-xl flex items-center gap-2 hover:bg-blue-50 transition"
+          >
             <Wallet className="w-4 h-4" /> Retirar
           </button>
         </div>
@@ -209,6 +183,7 @@ function DashboardPage() {
         </div>
       </div>
 
+      {/* Tarjeta de Nivel Dinámica */}
       <div className="bg-[#0F1523] border border-white/5 rounded-2xl p-5">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">
@@ -216,8 +191,8 @@ function DashboardPage() {
               <Award className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-xs text-slate-400">Tu nivel · Bronce</p>
-              <p className="font-bold text-lg text-white">LEVEL 1</p>
+              <p className="text-xs text-slate-400">Tu nivel actual</p>
+              <p className="font-bold text-lg text-white">LEVEL {userLevel}</p>
             </div>
           </div>
           <div className="bg-white/5 rounded-xl px-3 py-2 text-center border border-white/5">
@@ -231,7 +206,7 @@ function DashboardPage() {
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
             <span className="text-slate-400">Hoy llevas</span>
-            <span className="text-slate-400">Para subir a <strong className="text-white">LEVEL 1</strong></span>
+            <span className="text-slate-400">Para subir a <strong className="text-white">LEVEL {userLevel + 1}</strong></span>
           </div>
           <div className="flex justify-between items-end">
             <span className="text-3xl font-black text-white">{totalClicks} <span className="text-lg text-slate-500 font-medium">/ 300</span></span>
@@ -249,9 +224,6 @@ function DashboardPage() {
               {i}
             </div>
           ))}
-        </div>
-        <div className="mt-4 bg-white/5 rounded-lg p-2 text-center text-xs text-slate-400">
-          Falla <strong className="text-white">1 día</strong> – racha completa perdida · nunca bajas de nivel
         </div>
       </div>
 
@@ -282,27 +254,6 @@ function DashboardPage() {
       </div>
 
       <LinksTable links={links} onCopy={() => handleCopy(`${domain}/s/${links.short_code}`)} />
-
-      <div className="bg-[#0F1523] border border-white/5 rounded-2xl p-6 text-center">
-        <div className="flex items-center justify-center gap-2 mb-4">
-          <div className="bg-blue-500/10 p-2 rounded-xl"><TrendingUp className="w-5 h-5 text-blue-500" /></div>
-          <h3 className="font-bold text-lg text-white">Meta del mes</h3>
-        </div>
-        
-        {meta > 0 ? (
-          <div className="mb-4">
-            <p className="text-sm text-slate-400 mb-1">Tu meta actual</p>
-            <p className="text-3xl font-black text-blue-500">${meta.toFixed(2)}</p>
-            <button onClick={() => { setMetaInput(meta); setShowMetaModal(true); }} className="mt-3 text-xs text-slate-400 hover:text-white underline">Editar meta</button>
-          </div>
-        ) : (
-          <>
-            <p className="text-sm text-slate-400 mb-2">Define tu meta del mes</p>
-            <p className="text-xs text-slate-500 mb-4">Sugerida: <strong className="text-slate-300">$5.00</strong> (un 25% más que tu mes pasado)</p>
-            <button onClick={() => setShowMetaModal(true)} className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 px-6 rounded-xl transition">Poner meta</button>
-          </>
-        )}
-      </div>
 
       <div className="bg-[#0F1523] border border-white/5 rounded-2xl p-4 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">

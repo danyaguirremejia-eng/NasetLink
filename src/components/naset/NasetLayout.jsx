@@ -1,8 +1,29 @@
 import { Link } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
+import { db } from "@/lib/firebase";
+import { doc, onSnapshot } from "firebase/firestore";
 import TopBar from "./TopBar";
 import BottomNav from "./BottomNav";
 
 export default function NasetLayout({ children }) {
+  const [level, setLevel] = useState(1);
+
+  useEffect(() => {
+    // Escuchar el nivel del usuario logueado en tiempo real
+    import("firebase/auth").then(({ getAuth }) => {
+      const auth = getAuth();
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        const unsub = onSnapshot(doc(db, "users", currentUser.uid), (docSnap) => {
+          if (docSnap.exists() && docSnap.data().level) {
+            setLevel(docSnap.data().level);
+          }
+        });
+        return () => unsub();
+      }
+    });
+  }, []);
+
   return (
     <div className="naset-bg relative min-h-screen overflow-x-hidden text-slate-100">
       <div className="pointer-events-none fixed inset-0 grid-lines" />
@@ -25,7 +46,7 @@ export default function NasetLayout({ children }) {
             </span>
           </Link>
           <span className="rounded-full border border-[#00f0ff]/30 bg-[#00f0ff]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[#00f0ff]">
-            Nivel 2
+            Nivel {level}
           </span>
         </div>
 

@@ -16,7 +16,6 @@ function ChatPage() {
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef(null);
 
-  // Escuchar mensajes en tiempo real
   useEffect(() => {
     const q = query(collection(db, "chat_global"), orderBy("createdAt", "asc"));
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -25,7 +24,6 @@ function ChatPage() {
         msgs.push({ id: doc.id, ...doc.data() });
       });
       setMessages(msgs);
-      // Auto-scroll al fondo
       setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
       }, 100);
@@ -55,6 +53,13 @@ function ChatPage() {
     }
   };
 
+  // Función para formatear la hora
+  const getTime = (timestamp) => {
+    if (!timestamp) return "Enviando...";
+    const date = new Date(timestamp.toMillis());
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
   return (
     <div className="flex flex-col h-[calc(100vh-140px)] bg-[#0B0F19] rounded-2xl border border-white/5 overflow-hidden">
       
@@ -62,7 +67,7 @@ function ChatPage() {
       <div className="bg-[#0F1523] border-b border-white/5 p-4 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-blue-600/20 border border-blue-500/30 rounded-xl flex items-center justify-center">
-            <span className="text-blue-500 font-black text-xs">DN</span>
+            <span className="text-blue-500 font-black text-xs">NS</span>
           </div>
           <div>
             <h2 className="text-white font-bold text-sm">Sala general</h2>
@@ -77,7 +82,7 @@ function ChatPage() {
       </div>
 
       {/* Área de Mensajes */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')]">
         {messages.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center opacity-30">
             <div className="text-4xl font-black mb-2 text-white">NASETLINK</div>
@@ -87,17 +92,32 @@ function ChatPage() {
           messages.map((msg) => {
             const isMe = msg.userId === user.uid;
             return (
-              <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[80%] flex gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
-                  {!isMe && (
-                    <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center shrink-0 text-white font-bold text-xs">
-                      {msg.userAvatar ? <img src={msg.userAvatar} className="w-full h-full rounded-full object-cover" /> : msg.userName[0].toUpperCase()}
-                    </div>
-                  )}
-                  <div>
-                    {!isMe && <p className="text-[10px] text-slate-500 mb-1 ml-1">{msg.userName}</p>}
-                    <div className={`p-3 rounded-2xl ${isMe ? 'bg-blue-600 text-white rounded-tr-sm' : 'bg-[#0F1523] text-slate-200 border border-white/5 rounded-tl-sm'}`}>
-                      <p className="text-sm break-words">{msg.text}</p>
+              <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'} mb-2`}>
+                <div className={`max-w-[85%] flex gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
+                  
+                  {/* Avatar del usuario */}
+                  <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center shrink-0 text-white font-bold text-xs mt-auto shadow-md">
+                    {msg.userAvatar ? (
+                      <img src={msg.userAvatar} className="w-full h-full rounded-full object-cover" alt="avatar" />
+                    ) : (
+                      msg.userName[0].toUpperCase()
+                    )}
+                  </div>
+
+                  {/* Bloque del mensaje */}
+                  <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                    {/* Nombre (solo para los demás) */}
+                    {!isMe && (
+                      <p className="text-[11px] text-slate-400 mb-1 ml-1 font-medium">{msg.userName}</p>
+                    )}
+                    
+                    {/* Burbuja */}
+                    <div className={`p-2.5 px-3 rounded-2xl relative pb-5 min-w-[100px] shadow-sm ${isMe ? 'bg-blue-600 text-white rounded-tr-sm' : 'bg-[#0F1523] text-slate-200 border border-white/5 rounded-tl-sm'}`}>
+                      <p className="text-sm break-words leading-relaxed pr-2">{msg.text}</p>
+                      {/* Hora */}
+                      <span className={`text-[9px] absolute bottom-1.5 right-2.5 ${isMe ? 'text-blue-200' : 'text-slate-500'}`}>
+                        {getTime(msg.createdAt)}
+                      </span>
                     </div>
                   </div>
                 </div>

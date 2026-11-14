@@ -24,9 +24,13 @@ export default function BottomNav() {
     }
   };
 
+  const goTo = (route) => {
+    setIsMenuOpen(false);
+    navigate({ to: route });
+  };
+
   return (
     <>
-      {/* BARRA INFERIOR FLOTANTE */}
       <div className="fixed bottom-4 left-0 right-0 z-40 flex justify-center px-4 pb-safe pointer-events-none">
         <nav className="pointer-events-auto flex w-full max-w-[340px] items-center justify-around rounded-[2rem] border border-white/10 bg-[#0f1523]/60 px-2 py-2 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] backdrop-blur-xl">
           
@@ -64,17 +68,11 @@ export default function BottomNav() {
         </nav>
       </div>
 
-      {/* MENÚ DESPLEGABLE (3 PUNTITOS) */}
       {isMenuOpen && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm sm:items-center">
-          
-          {/* Fondo para cerrar al tocar afuera */}
           <div className="absolute inset-0" onClick={() => setIsMenuOpen(false)}></div>
 
-          {/* Contenido del menú */}
           <div className="relative w-full max-w-md max-h-[85vh] overflow-y-auto rounded-t-[2rem] sm:rounded-3xl border-t sm:border border-white/10 bg-[#0f1523] p-4 shadow-2xl pb-safe">
-            
-            {/* Barrita de arrastre superior */}
             <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-slate-700 sm:hidden"></div>
 
             <div className="flex items-center justify-between mb-6 px-2">
@@ -86,38 +84,34 @@ export default function BottomNav() {
 
             <div className="space-y-6">
               
-              {/* MENÚ */}
               <div>
-                <Link to="/dashboard" onClick={() => setIsMenuOpen(false)} className="flex items-center justify-between rounded-xl bg-blue-500/10 p-3 text-blue-400 border border-blue-500/20">
+                <button onClick={() => goTo("/dashboard")} className="w-full flex items-center justify-between rounded-xl bg-blue-500/10 p-3 text-blue-400 border border-blue-500/20">
                   <div className="flex items-center gap-3">
                     <div className="bg-blue-500 text-white p-2 rounded-lg"><Home className="w-4 h-4" /></div>
                     <span className="font-semibold text-sm">Inicio</span>
                   </div>
                   <ChevronRight className="w-4 h-4" />
-                </Link>
+                </button>
               </div>
 
-              {/* MI CONTENIDO */}
               <div>
                 <p className="px-2 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Mi contenido</p>
                 <div className="space-y-1">
-                  <MenuButton icon={Zap} text="Crear enlace" onClick={() => { setIsMenuOpen(false); navigate({ to: "/links" }); }} />
-                  <MenuButton icon={Key} text="Crear key" />
-                  <MenuButton icon={Code} text="API para desarrolladores" />
+                  <MenuButton icon={Zap} text="Crear enlace" onClick={() => goTo("/links")} />
+                  <MenuButton icon={Key} text="Crear key" onClick={() => goTo("/keys")} />
+                  <MenuButton icon={Code} text="API para desarrolladores" onClick={() => goTo("/api")} />
                   <MenuButton icon={Palette} text="Mi página" />
                 </div>
               </div>
 
-              {/* GANANCIAS */}
               <div>
                 <p className="px-2 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Ganancias</p>
                 <div className="space-y-1">
-                  <MenuButton icon={Banknote} text="Retiros" />
+                  <MenuButton icon={Banknote} text="Retiros" onClick={() => goTo("/retiros")} />
                   <MenuButton icon={Users} text="Referidos" />
                 </div>
               </div>
 
-              {/* RENDIMIENTO */}
               <div>
                 <p className="px-2 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Rendimiento</p>
                 <div className="space-y-1">
@@ -126,7 +120,6 @@ export default function BottomNav() {
                 </div>
               </div>
 
-              {/* CUENTA */}
               <div>
                 <p className="px-2 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Cuenta</p>
                 <div className="space-y-1">
@@ -138,7 +131,6 @@ export default function BottomNav() {
                 </div>
               </div>
 
-              {/* COMUNIDAD */}
               <div>
                 <p className="px-2 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Comunidad</p>
                 <div className="space-y-1">
@@ -146,7 +138,6 @@ export default function BottomNav() {
                 </div>
               </div>
 
-              {/* CERRAR SESIÓN */}
               <div className="pt-4 border-t border-white/5">
                 <button 
                   onClick={handleLogout}
@@ -167,7 +158,6 @@ export default function BottomNav() {
   );
 }
 
-// Componente auxiliar para los botones del menú
 function MenuButton({ icon: Icon, text, onClick }) {
   return (
     <button onClick={onClick} className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors text-slate-300">

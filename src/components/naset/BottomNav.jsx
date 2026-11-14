@@ -139,7 +139,7 @@ export default function BottomNav() {
                   <MenuButton icon={Megaphone} text="Anuncios" onClick={() => goTo("/anuncios")} />
                   <MenuButton icon={Lightbulb} text="Muro de ideas" onClick={() => goTo("/sugerencias")} />
                   <MenuButton icon={HelpCircle} text="Ayuda" />
-                  <MenuButton icon={Headphones} text="Soporte" />
+                  <MenuButton icon={Headphones} text="Soporte" onClick={() => goTo("/soporte")} />
                   <MenuButton icon={User} text="Perfil" />
                 </div>
               </div>

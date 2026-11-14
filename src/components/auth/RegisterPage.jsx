@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { toast } from "sonner";
-import { AuthError, AuthLink, SubmitButton } from "@/components/auth/parts";
+import { AuthError, AuthLink } from "@/components/auth/parts";
 import { RegisterForm } from "@/components/auth/register/RegisterForm";
 import { RegisterShell } from "@/components/auth/register/RegisterShell";
 import { countryByCode } from "@/components/auth/register/options";
@@ -18,7 +18,7 @@ const INITIAL = {
   dialCountry: "MX",
   whatsapp: "",
   terms: false,
-  rememberMe: true, // <--- NUEVO CAMPO
+  rememberMe: true,
 };
 
 function isHttpUrl(value) {
@@ -67,7 +67,6 @@ export function RegisterPage() {
     setBusy(true);
     try {
       await setPersistence(auth, values.rememberMe ? browserLocalPersistence : browserSessionPersistence);
-
       const userCredential = await createUserWithEmailAndPassword(auth, email, values.password);
       
       await updateProfile(userCredential.user, {
@@ -75,7 +74,12 @@ export function RegisterPage() {
       });
 
       toast.success("¡Cuenta creada con éxito!");
-      window.location.href = "/dashboard"; 
+      
+      // RETRASO DE SEGURIDAD PARA QUE FIREBASE GUARDE LA SESIÓN
+      setTimeout(() => {
+        window.location.href = "/dashboard"; 
+      }, 500);
+      
     } catch (err) {
       console.error(err);
       if (err.code === 'auth/email-already-in-use') {
@@ -83,7 +87,6 @@ export function RegisterPage() {
       } else {
         setError(err.message || "No pudimos crear tu cuenta. Inténtalo de nuevo.");
       }
-    } finally {
       setBusy(false);
     }
   }
@@ -95,11 +98,14 @@ export function RegisterPage() {
       await setPersistence(auth, browserLocalPersistence);
       await signInWithPopup(auth, googleProvider);
       toast.success("¡Bienvenido!");
-      window.location.href = "/dashboard";
+      
+      setTimeout(() => {
+        window.location.href = "/dashboard";
+      }, 500);
+
     } catch (err) {
       console.error(err);
       setError(err.message || "No pudimos iniciar sesión con Google.");
-    } finally {
       setBusy(false);
     }
   }
@@ -115,7 +121,6 @@ export function RegisterPage() {
         </>
       }
     >
-      <AuthError>{error}</AuthError>
       <RegisterForm 
         values={values} 
         onChange={change} 

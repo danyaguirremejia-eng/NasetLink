@@ -23,11 +23,14 @@ export function LoginPage() {
     setError("");
     setBusy(true);
     try {
-      // Configurar la persistencia según el checkbox
       await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
-      
       await signInWithEmailAndPassword(auth, email, password);
-      window.location.href = targetRoute;
+      
+      // RETRASO DE SEGURIDAD PARA QUE FIREBASE GUARDE LA SESIÓN
+      setTimeout(() => {
+        window.location.href = targetRoute;
+      }, 500);
+      
     } catch (err) {
       console.error(err);
       if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password') {
@@ -47,7 +50,11 @@ export function LoginPage() {
     try {
       await setPersistence(auth, browserLocalPersistence);
       await signInWithPopup(auth, googleProvider);
-      window.location.href = "/dashboard";
+      
+      setTimeout(() => {
+        window.location.href = "/dashboard";
+      }, 500);
+
     } catch (err) {
       console.error(err);
       setError(err.message || "Error al conectar con Google.");

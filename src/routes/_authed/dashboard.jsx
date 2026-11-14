@@ -17,12 +17,15 @@ export const Route = createFileRoute("/_authed/dashboard")({
       },
     ],
   }),
-  loader: () => getDashboard(),
+  // 1. Recibimos el usuario desde el guardián (_authed) y lo usamos en el loader
+  loader: ({ context }) => getDashboard({ data: { userId: context.user.uid } }),
   component: DashboardPage,
 });
 
 function DashboardPage() {
   const { links, balance } = Route.useLoaderData();
+  // 2. Obtenemos el usuario del contexto para usarlo en el formulario
+  const { user } = Route.useRouteContext(); 
   const router = useRouter();
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -33,10 +36,11 @@ function DashboardPage() {
     if (!url.trim() || loading) return;
     setLoading(true);
     try {
-      const link = await createShortLink({ data: { url } });
+      // 3. Pasamos el userId junto con la url a la función de Firestore
+      const link = await createShortLink({ data: { url, userId: user.uid } });
       setCreated(link);
       setUrl("");
-      await router.invalidate();
+      await router.invalidate(); // Recarga los datos para que aparezca en la tabla
     } catch (error) {
       toast.error(error?.message || "No se pudo acortar el enlace");
     } finally {

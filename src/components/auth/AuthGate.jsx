@@ -1,35 +1,34 @@
 import { redirect } from "@tanstack/react-router";
 import { DefaultCatchBoundary } from "@/components/DefaultCatchBoundary";
-import { UserNotRegistered } from "@/components/auth/UserNotRegistered";
-import { authQuery } from "@/lib/AuthContext";
-
-class NotRegisteredError extends Error {}
+import { auth } from "@/lib/firebase";
+import { onAuthStateChanged } from "firebase/auth";
 
 /**
- * The login gate for a pathless layout route (src/routes/_authed.jsx), which gates
- * every route under src/routes/_authed/ (their URLs carry no "_authed" segment):
- *
- *   createFileRoute("/_authed")({ ssr: false, beforeLoad: requireSignedIn, errorComponent: AuthGateError })
- *
- * TanStack Router's authenticated-routes pattern: beforeLoad reads the visitor from the
- * router context (the QueryClient's cached `authQuery`, shared with useAuth()), so a
- * child's loader never runs as an anonymous visitor. Signed out → /login with the way
- * back; signed in but not a user of this app → the not-registered screen. Children read
- * the visitor with `Route.useRouteContext().user`. `ssr: false` — the server is anonymous,
- * so these pages render in the browser only, and children inherit that.
+ * El guardián ahora usa Firebase para verificar si el usuario está logueado.
+ * Usamos una Promesa con onAuthStateChanged para evitar que el usuario sea
+ * redirigido al login mientras Firebase está cargando la sesión inicial.
  */
-export async function requireSignedIn({ context, location }) {
-  // A /me outage (429, 503) is not a sign-out: it rejects here and reaches the error
-  // boundary, whose "Try again" asks the server again (a failed query caches nothing).
-  const { user, error } = await context.queryClient.ensureQueryData(authQuery);
-  if (user) return { user };
-  // Thrown rather than returned so the children's loaders never run without a user.
-  if (error?.type === "user_not_registered") throw new NotRegisteredError(error.message);
-  // A document navigation on purpose: an app served behind the platform login gets the
-  // platform's /login, which reads from_url; the app's own /login page reads returnTo.
-  throw redirect({ to: "/login", search: { returnTo: location.href, from_url: location.href }, reloadDocument: true });
+export async function requireSignedIn({ location }) {
+  const user = await new Promise((resolve) => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      unsubscribe();
+      resolve(currentUser);
+    });
+  });
+
+  if (user) {
+    // Si hay usuario, lo pasamos al contexto para que el Dashboard lo use
+    return { user };
+  }
+
+  // Si no hay usuario, lo mandamos al login guardando la ruta a la que quería ir
+  throw redirect({
+    to: "/login",
+    search: { returnTo: location.href, from_url: location.href },
+    reloadDocument: true,
+  });
 }
 
 export function AuthGateError({ error }) {
-  return error instanceof NotRegisteredError ? <UserNotRegistered /> : <DefaultCatchBoundary error={error} />;
+  return <DefaultCatchBoundary error={error} />;
 }

@@ -1,0 +1,1 @@
+import{v as e}from"./index-CAVTNdZc.js";var t=e;export{t as errorComponent};

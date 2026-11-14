@@ -1,5 +1,6 @@
 import { Lock, LogIn, Mail } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { AuthError, AuthLink, OrDivider, SubmitButton } from "@/components/auth/parts";
 import { Input } from "@/components/ui/input";
@@ -9,12 +10,13 @@ import { auth, googleProvider } from "../../lib/firebase";
 import { signInWithEmailAndPassword, signInWithPopup, setPersistence, browserLocalPersistence, browserSessionPersistence } from "firebase/auth";
 
 export function LoginPage() {
+  const navigate = useNavigate();
   const rawReturnTo = safeReturnTo();
   const targetRoute = rawReturnTo && rawReturnTo !== "/login" ? rawReturnTo : "/dashboard";
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(true); 
+  const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -26,10 +28,7 @@ export function LoginPage() {
       await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
       await signInWithEmailAndPassword(auth, email, password);
       
-      // RETRASO DE SEGURIDAD PARA QUE FIREBASE GUARDE LA SESIÓN
-      setTimeout(() => {
-        window.location.href = targetRoute;
-      }, 500);
+      navigate({ to: targetRoute });
       
     } catch (err) {
       console.error(err);
@@ -51,10 +50,8 @@ export function LoginPage() {
       await setPersistence(auth, browserLocalPersistence);
       await signInWithPopup(auth, googleProvider);
       
-      setTimeout(() => {
-        window.location.href = "/dashboard";
-      }, 500);
-
+      navigate({ to: "/dashboard" });
+      
     } catch (err) {
       console.error(err);
       setError(err.message || "Error al conectar con Google.");
@@ -64,8 +61,7 @@ export function LoginPage() {
 
   return (
     <AuthLayout icon={LogIn} title="Bienvenido de nuevo" subtitle="Inicia sesión en tu cuenta">
-      
-      <button 
+      <button
         type="button" onClick={handleGoogleLogin} disabled={busy}
         className="flex w-full items-center justify-center gap-3 rounded-lg bg-white py-3 text-sm font-medium text-black transition-colors hover:bg-gray-100 disabled:opacity-50"
       >
@@ -77,10 +73,10 @@ export function LoginPage() {
         </svg>
         Continuar con Google
       </button>
-      
+
       <OrDivider />
       <AuthError>{error}</AuthError>
-      
+
       <form onSubmit={submit} className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="login-email">Email</Label>
@@ -103,9 +99,9 @@ export function LoginPage() {
         </div>
 
         <div className="flex items-center space-x-2 pt-2">
-          <input 
-            type="checkbox" 
-            id="rememberMe" 
+          <input
+            type="checkbox"
+            id="rememberMe"
             checked={rememberMe}
             onChange={(e) => setRememberMe(e.target.checked)}
             className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
@@ -119,7 +115,7 @@ export function LoginPage() {
           Iniciar sesión
         </SubmitButton>
       </form>
-      
+
       <p className="mt-6 text-center text-sm text-muted-foreground">
         ¿No tienes una cuenta?{" "}
         <AuthLink to="/register" returnTo={targetRoute}>

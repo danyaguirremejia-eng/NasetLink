@@ -137,7 +137,7 @@ export default function BottomNav() {
                 <p className="px-2 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Cuenta</p>
                 <div className="space-y-1">
                   <MenuButton icon={Megaphone} text="Anuncios" onClick={() => goTo("/anuncios")} />
-                  <MenuButton icon={Lightbulb} text="Muro de ideas" />
+                  <MenuButton icon={Lightbulb} text="Muro de ideas" onClick={() => goTo("/sugerencias")} />
                   <MenuButton icon={HelpCircle} text="Ayuda" />
                   <MenuButton icon={Headphones} text="Soporte" />
                   <MenuButton icon={User} text="Perfil" />

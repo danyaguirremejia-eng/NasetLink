@@ -11,7 +11,7 @@ export const Route = createRootRouteWithContext()({
       { name: "viewport", content: "width=device-width, initial-scale=1, maximum-scale=1" },
     ],
     links: [
-      { rel: "icon", type: "image/png", href: "/logo.png" }
+      { rel: "icon", type: "image/png", href: "/logo.png?v=1" } // <-- El ?v=1 obliga al navegador a descargarlo de nuevo
     ]
   }),
   component: RootComponent,

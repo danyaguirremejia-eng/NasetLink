@@ -10,6 +10,11 @@ export const Route = createFileRoute("/_authed/admin")({
   component: AdminPage,
 });
 
+// ⬇️ PON LOS CORREOS AQUÍ ABAJO ⬇️
+const OWNER_EMAILS = ["danyxiter67@gmail.com"]; // <-- Pon tu correo de Owner aquí
+const MODERATOR_EMAILS = ["moderador@ejemplo.com"]; // <-- Pon tu correo de Moderador aquí
+const ADMIN_EMAILS = ["admin@ejemplo.com"]; // <-- Pon tu correo de Admin aquí
+
 function AdminPage() {
   const navigate = useNavigate();
   
@@ -29,21 +34,33 @@ function AdminPage() {
   const [replyingTo, setReplyingTo] = useState(null);
   const [replyText, setReplyText] = useState("");
 
-  // REGLAS DE PODER:
-  // Owner y Moderador tienen control total
   const isSuperStaff = myRole === 'owner' || myRole === 'moderator';
-  // Admin solo puede gestionar usuarios y ver tickets
   const isStaff = myRole === 'owner' || myRole === 'moderator' || myRole === 'admin';
 
   useEffect(() => {
     if (!auth.currentUser) return;
+
+    const userEmail = auth.currentUser.email;
     
+    // 1. Revisamos primero los correos hardcodeados
+    let hardcodedRole = null;
+    if (OWNER_EMAILS.includes(userEmail)) hardcodedRole = 'owner';
+    else if (MODERATOR_EMAILS.includes(userEmail)) hardcodedRole = 'moderator';
+    else if (ADMIN_EMAILS.includes(userEmail)) hardcodedRole = 'admin';
+
+    if (hardcodedRole) {
+      setMyRole(hardcodedRole);
+      fetchData();
+      return; // Si está en la lista, ya no busca en Firestore
+    }
+
+    // 2. Si no está en las listas, revisa su rol en Firestore (por si se lo dieron desde el panel)
     const unsub = onSnapshot(doc(db, "users", auth.currentUser.uid), (docSnap) => {
       if (docSnap.exists()) {
         const role = docSnap.data().role;
         setMyRole(role);
         
-        if (role !== 'owner' && role !== 'admin' && role !== 'moderator') {
+        if (role !== 'admin' && role !== 'moderator') {
           toast.error("No tienes permiso para estar aquí");
           navigate({ to: "/dashboard" });
         } else {
@@ -71,9 +88,17 @@ function AdminPage() {
       const uList = [];
       usersSnap.forEach((doc) => {
         const data = doc.data();
+        let displayRole = data.role;
+        
+        // Forzamos el rol visual si está en las listas de correos
+        if (OWNER_EMAILS.includes(data.email)) displayRole = 'owner';
+        else if (MODERATOR_EMAILS.includes(data.email)) displayRole = 'moderator';
+        else if (ADMIN_EMAILS.includes(data.email)) displayRole = 'admin';
+
         uList.push({ 
           id: doc.id, 
           ...data, 
+          role: displayRole,
           totalEarnings: earningsMap[doc.id] || 0
         });
       });
@@ -163,7 +188,6 @@ function AdminPage() {
       <div className={`grid ${isSuperStaff ? 'grid-cols-3' : 'grid-cols-2'} gap-2 bg-[#0F1523] p-1 rounded-xl border border-white/5`}>
         <button onClick={() => setActiveTab("users")} className={`py-2 text-xs font-bold rounded-lg transition ${activeTab === 'users' ? 'bg-red-500/20 text-red-400' : 'text-slate-400'}`}>Usuarios</button>
         
-        {/* Solo Owner y Moderador ven la pestaña de Anuncios */}
         {isSuperStaff && (
           <button onClick={() => setActiveTab("announcements")} className={`py-2 text-xs font-bold rounded-lg transition ${activeTab === 'announcements' ? 'bg-blue-500/20 text-blue-400' : 'text-slate-400'}`}>Anuncios</button>
         )}
@@ -213,8 +237,7 @@ function AdminPage() {
                   </span>
                 </div>
 
-                {/* SELECTOR DE ROL (Owner y Moderador pueden usarlo) */}
-                {isSuperStaff && u.id !== auth.currentUser?.uid && (
+                {isSuperStaff && u.id !== auth.currentUser?.uid && u.role !== 'owner' && (
                   <div className="flex items-center gap-2 border-t border-white/5 pt-3">
                     <Shield className="w-4 h-4 text-slate-400" />
                     <select 
@@ -225,8 +248,6 @@ function AdminPage() {
                       <option value="user">Quitar Rango (Usuario normal)</option>
                       <option value="admin">Admin (Básico)</option>
                       <option value="moderator">Moderador (Control Total)</option>
-                      {/* Solo el Owner puede nombrar a otro Owner por seguridad */}
-                      {myRole === 'owner' && <option value="owner">Owner (Dueño)</option>}
                     </select>
                   </div>
                 )}

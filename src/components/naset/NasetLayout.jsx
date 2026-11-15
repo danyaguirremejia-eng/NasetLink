@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import { db } from "@/lib/firebase";
+import { db, auth } from "@/lib/firebase";
 import { doc, onSnapshot } from "firebase/firestore";
 import TopBar from "./TopBar";
 import BottomNav from "./BottomNav";
@@ -9,19 +9,16 @@ export default function NasetLayout({ children }) {
   const [level, setLevel] = useState(1);
 
   useEffect(() => {
-    // Escuchar el nivel del usuario logueado en tiempo real
-    import("firebase/auth").then(({ getAuth }) => {
-      const auth = getAuth();
-      const currentUser = auth.currentUser;
-      if (currentUser) {
-        const unsub = onSnapshot(doc(db, "users", currentUser.uid), (docSnap) => {
-          if (docSnap.exists() && docSnap.data().level) {
-            setLevel(docSnap.data().level);
-          }
-        });
-        return () => unsub();
+    if (!auth.currentUser) return;
+    
+    // Escuchar los cambios del nivel en tiempo real
+    const unsub = onSnapshot(doc(db, "users", auth.currentUser.uid), (docSnap) => {
+      if (docSnap.exists()) {
+        setLevel(docSnap.data().level || 1);
       }
     });
+    
+    return () => unsub();
   }, []);
 
   return (

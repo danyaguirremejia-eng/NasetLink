@@ -1,6 +1,7 @@
 import { createRootRouteWithContext, Outlet, HeadContent, Scripts } from '@tanstack/react-router'
 import { Toaster } from 'sonner'
-import { AuthProvider } from '@/lib/AuthContext' // <-- Importamos el provider
+import { AuthProvider } from '@/lib/AuthContext'
+import '../index.css' // <-- ESTA ES LA LÍNEA QUE FALTABA PARA LOS ESTILOS
 
 export const Route = createRootRouteWithContext()({
   head: () => ({
@@ -18,7 +19,7 @@ function RootComponent() {
       <head>
         <HeadContent />
       </head>
-      <body className="bg-[#0B0F19] text-white">
+      <body className="bg-[#0B0F19] text-white font-sans antialiased">
         <AuthProvider>
           <Outlet />
         </AuthProvider>

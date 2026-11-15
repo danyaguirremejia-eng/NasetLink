@@ -10,7 +10,6 @@ import {
   Headphones, User, MessageCircle, LogOut, ChevronRight, ShieldAlert, ArrowRightLeft
 } from "lucide-react";
 
-// ⬇️ PON LOS MISMOS CORREOS AQUÍ PARA QUE LES APAREZCA EL BOTÓN ⬇️
 const OWNER_EMAILS = ["danyxiter67@gmail.com"]; 
 const MODERATOR_EMAILS = ["moderador@ejemplo.com"]; 
 const ADMIN_EMAILS = ["admin@ejemplo.com"]; 
@@ -27,21 +26,10 @@ export default function BottomNav() {
     
     const userEmail = auth.currentUser.email;
     
-    // Revisar los correos hardcodeados primero
-    if (OWNER_EMAILS.includes(userEmail)) {
-      setUserRole('owner');
-      return;
-    }
-    if (MODERATOR_EMAILS.includes(userEmail)) {
-      setUserRole('moderator');
-      return;
-    }
-    if (ADMIN_EMAILS.includes(userEmail)) {
-      setUserRole('admin');
-      return;
-    }
+    if (OWNER_EMAILS.includes(userEmail)) { setUserRole('owner'); return; }
+    if (MODERATOR_EMAILS.includes(userEmail)) { setUserRole('moderator'); return; }
+    if (ADMIN_EMAILS.includes(userEmail)) { setUserRole('admin'); return; }
 
-    // Si no está en las listas, revisar Firestore
     const unsub = onSnapshot(doc(db, "users", auth.currentUser.uid), (docSnap) => {
       if (docSnap.exists()) {
         setUserRole(docSnap.data().role);
@@ -128,9 +116,12 @@ export default function BottomNav() {
 
             <div className="space-y-6">
               <div>
-                <button onClick={() => goTo("/dashboard")} className="w-full flex items-center justify-between rounded-xl bg-purple-500/10 p-3 text-purple-400 border border-purple-500/20">
+                <button 
+                  onClick={() => goTo("/dashboard")} 
+                  className={`w-full flex items-center justify-between rounded-xl p-3 transition-colors border ${path === '/dashboard' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' : 'text-slate-300 border-transparent hover:bg-white/5'}`}
+                >
                   <div className="flex items-center gap-3">
-                    <div className="bg-purple-600 text-white p-2 rounded-lg"><Home className="w-4 h-4" /></div>
+                    <div className={`p-2 rounded-lg ${path === '/dashboard' ? 'bg-purple-600 text-white' : 'bg-white/5 text-slate-400'}`}><Home className="w-4 h-4" /></div>
                     <span className="font-semibold text-sm">Inicio</span>
                   </div>
                   <ChevronRight className="w-4 h-4" />
@@ -140,44 +131,44 @@ export default function BottomNav() {
               <div>
                 <p className="px-2 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Mi contenido</p>
                 <div className="space-y-1">
-                  <MenuButton icon={Zap} text="Crear enlace" onClick={() => goTo("/links")} />
-                  <MenuButton icon={Key} text="Crear key" onClick={() => goTo("/keys")} />
-                  <MenuButton icon={Code} text="API para desarrolladores" onClick={() => goTo("/api")} />
-                  <MenuButton icon={Palette} text="Mi página" onClick={() => goTo("/personaliza")} />
+                  <MenuButton icon={Zap} text="Crear enlace" path="/links" currentPath={path} onClick={() => goTo("/links")} />
+                  <MenuButton icon={Key} text="Crear key" path="/keys" currentPath={path} onClick={() => goTo("/keys")} />
+                  <MenuButton icon={Code} text="API para desarrolladores" path="/api" currentPath={path} onClick={() => goTo("/api")} />
+                  <MenuButton icon={Palette} text="Mi página" path="/personaliza" currentPath={path} onClick={() => goTo("/personaliza")} />
                 </div>
               </div>
 
               <div>
                 <p className="px-2 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Ganancias</p>
                 <div className="space-y-1">
-                  <MenuButton icon={Banknote} text="Retiros" onClick={() => goTo("/retiros")} />
-                  <MenuButton icon={Users} text="Referidos" onClick={() => goTo("/referidos")} />
+                  <MenuButton icon={Banknote} text="Retiros" path="/retiros" currentPath={path} onClick={() => goTo("/retiros")} />
+                  <MenuButton icon={Users} text="Referidos" path="/referidos" currentPath={path} onClick={() => goTo("/referidos")} />
                 </div>
               </div>
 
               <div>
                 <p className="px-2 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Rendimiento</p>
                 <div className="space-y-1">
-                  <MenuButton icon={Trophy} text="Ranking" onClick={() => goTo("/ranking")} />
-                  <MenuButton icon={Star} text="Niveles" onClick={() => goTo("/niveles")} />
+                  <MenuButton icon={Trophy} text="Ranking" path="/ranking" currentPath={path} onClick={() => goTo("/ranking")} />
+                  <MenuButton icon={Star} text="Niveles" path="/niveles" currentPath={path} onClick={() => goTo("/niveles")} />
                 </div>
               </div>
 
               <div>
                 <p className="px-2 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Cuenta</p>
                 <div className="space-y-1">
-                  <MenuButton icon={Megaphone} text="Anuncios" onClick={() => goTo("/anuncios")} />
-                  <MenuButton icon={Lightbulb} text="Muro de ideas" onClick={() => goTo("/sugerencias")} />
-                  <MenuButton icon={HelpCircle} text="Ayuda" onClick={() => goTo("/ayuda")} />
-                  <MenuButton icon={Headphones} text="Soporte" onClick={() => goTo("/soporte")} />
-                  <MenuButton icon={User} text="Perfil" onClick={() => goTo("/perfil")} />
+                  <MenuButton icon={Megaphone} text="Anuncios" path="/anuncios" currentPath={path} onClick={() => goTo("/anuncios")} />
+                  <MenuButton icon={Lightbulb} text="Muro de ideas" path="/sugerencias" currentPath={path} onClick={() => goTo("/sugerencias")} />
+                  <MenuButton icon={HelpCircle} text="Ayuda" path="/ayuda" currentPath={path} onClick={() => goTo("/ayuda")} />
+                  <MenuButton icon={Headphones} text="Soporte" path="/soporte" currentPath={path} onClick={() => goTo("/soporte")} />
+                  <MenuButton icon={User} text="Perfil" path="/perfil" currentPath={path} onClick={() => goTo("/perfil")} />
                 </div>
               </div>
 
               <div>
                 <p className="px-2 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Comunidad</p>
                 <div className="space-y-1">
-                  <MenuButton icon={MessageCircle} text="Chat en vivo" onClick={() => goTo("/chat")} />
+                  <MenuButton icon={MessageCircle} text="Chat en vivo" path="/chat" currentPath={path} onClick={() => goTo("/chat")} />
                 </div>
               </div>
 
@@ -185,15 +176,7 @@ export default function BottomNav() {
                 <div>
                   <p className="px-2 mb-2 text-[10px] font-bold text-red-500/70 uppercase tracking-widest">Administración</p>
                   <div className="space-y-1">
-                    <button onClick={() => goTo("/admin")} className="w-full flex items-center justify-between p-3 rounded-xl bg-red-500/5 hover:bg-red-500/10 border border-red-500/10 transition-colors text-red-400">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-red-500/10">
-                          <ShieldAlert className="w-4 h-4" />
-                        </div>
-                        <span className="font-medium text-sm">Admin Panel</span>
-                      </div>
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
+                    <MenuButton icon={ShieldAlert} text="Admin Panel" path="/admin" currentPath={path} onClick={() => goTo("/admin")} isRed={true} />
                   </div>
                 </div>
               )}
@@ -218,11 +201,24 @@ export default function BottomNav() {
   );
 }
 
-function MenuButton({ icon: Icon, text, onClick }) {
+function MenuButton({ icon: Icon, text, onClick, path, currentPath, isRed }) {
+  const isActive = currentPath === path;
+  
+  let baseClass = "w-full flex items-center justify-between p-3 rounded-xl transition-colors border ";
+  let iconClass = "p-2 rounded-lg transition-colors ";
+  
+  if (isRed) {
+    baseClass += isActive ? "bg-red-500/10 text-red-400 border-red-500/20" : "text-slate-300 border-transparent hover:bg-white/5";
+    iconClass += isActive ? "bg-red-500 text-white" : "bg-white/5 text-slate-400";
+  } else {
+    baseClass += isActive ? "bg-purple-500/10 text-purple-400 border-purple-500/20" : "text-slate-300 border-transparent hover:bg-white/5";
+    iconClass += isActive ? "bg-purple-600 text-white" : "bg-white/5 text-slate-400";
+  }
+
   return (
-    <button onClick={onClick} className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors text-slate-300">
+    <button onClick={onClick} className={baseClass}>
       <div className="flex items-center gap-3">
-        <div className="p-2 rounded-lg bg-white/5 text-slate-400">
+        <div className={iconClass}>
           <Icon className="w-4 h-4" />
         </div>
         <span className="font-medium text-sm">{text}</span>

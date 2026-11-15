@@ -10,10 +10,6 @@
       }
     },
     {
-      "src": "/sw.js",
-      "dest": "/sw.js"
-    },
-    {
       "src": "/(.*\\.(css|js|png|jpg|jpeg|svg|ico|woff2?|ttf))",
       "dest": "/$1"
     },

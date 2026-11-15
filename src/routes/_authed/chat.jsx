@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { db, auth } from "@/lib/firebase";
 import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, doc } from "firebase/firestore";
 import { toast } from "sonner";
-import { Mic, Send, Wifi, Volume2, User } from "lucide-react";
+import { Mic, Send, Wifi, Volume2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authed/chat")({
   head: () => ({ meta: [{ title: "Chat en vivo — NASETLINK" }] }),
@@ -16,7 +16,7 @@ function ChatPage() {
   const [myProfile, setMyProfile] = useState(null);
   const messagesEndRef = useRef(null);
 
-  // 1. Escuchar los datos de MI perfil en tiempo real (para tener la foto actualizada)
+  // 1. Escuchar los datos de MI perfil en tiempo real
   useEffect(() => {
     if (!auth.currentUser) return;
     const unsubProfile = onSnapshot(doc(db, "users", auth.currentUser.uid), (docSnap) => {
@@ -56,9 +56,7 @@ function ChatPage() {
         text: text,
         userId: auth.currentUser.uid,
         userName: myProfile?.displayName || auth.currentUser.displayName || auth.currentUser.email?.split("@")[0] || "Creador",
-        // Usamos la foto de Firestore, o el avatar, o nada
         userAvatar: myProfile?.photoURL || "", 
-        userIcon: myProfile?.avatar || "user",
         type: "text",
         createdAt: serverTimestamp(),
       });
@@ -102,14 +100,18 @@ function ChatPage() {
         ) : (
           messages.map((msg) => {
             const isMe = msg.userId === auth.currentUser?.uid;
+            
+            // AQUÍ ESTÁ EL TRUCO: Si soy yo, uso mi foto actual de Firestore. Si es otro, uso la que guardó.
+            const avatarToUse = isMe ? (myProfile?.photoURL || auth.currentUser?.photoURL) : msg.userAvatar;
+
             return (
               <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'} mb-2`}>
                 <div className={`max-w-[85%] flex gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
                   
                   {/* Avatar */}
-                  <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center shrink-0 text-white font-bold text-xs mt-auto shadow-md overflow-hidden border border-white/10">
-                    {msg.userAvatar ? (
-                      <img src={msg.userAvatar} className="w-full h-full object-cover" alt="avatar" />
+                  <div className={`w-8 h-8 rounded-full ${isMe ? 'bg-purple-600' : 'bg-blue-600'} flex items-center justify-center shrink-0 text-white font-bold text-xs mt-auto shadow-md overflow-hidden border border-white/10`}>
+                    {avatarToUse ? (
+                      <img src={avatarToUse} className="w-full h-full object-cover" alt="avatar" />
                     ) : (
                       msg.userName[0].toUpperCase()
                     )}
@@ -120,9 +122,9 @@ function ChatPage() {
                       <p className="text-[11px] text-slate-400 mb-1 ml-1 font-medium">{msg.userName}</p>
                     )}
                     
-                    <div className={`p-2.5 px-3 rounded-2xl relative pb-5 min-w-[100px] shadow-sm ${isMe ? 'bg-blue-600 text-white rounded-tr-sm' : 'bg-[#0F1523] text-slate-200 border border-white/5 rounded-tl-sm'}`}>
+                    <div className={`p-2.5 px-3 rounded-2xl relative pb-5 min-w-[100px] shadow-sm ${isMe ? 'bg-purple-600 text-white rounded-tr-sm' : 'bg-[#0F1523] text-slate-200 border border-white/5 rounded-tl-sm'}`}>
                       <p className="text-sm break-words leading-relaxed pr-2">{msg.text}</p>
-                      <span className={`text-[9px] absolute bottom-1.5 right-2.5 ${isMe ? 'text-blue-200' : 'text-slate-500'}`}>
+                      <span className={`text-[9px] absolute bottom-1.5 right-2.5 ${isMe ? 'text-purple-200' : 'text-slate-500'}`}>
                         {getTime(msg.createdAt)}
                       </span>
                     </div>
@@ -146,13 +148,13 @@ function ChatPage() {
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             placeholder="Escribe algo..."
-            className="flex-1 bg-black/30 border border-white/10 rounded-xl py-3 px-4 text-sm text-white placeholder-slate-500 outline-none focus:border-blue-500"
+            className="flex-1 bg-black/30 border border-white/10 rounded-xl py-3 px-4 text-sm text-white placeholder-slate-500 outline-none focus:border-purple-500"
           />
 
           <button 
             type="submit" 
             disabled={!newMessage.trim()}
-            className="p-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition disabled:opacity-50 disabled:bg-slate-700"
+            className="p-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition disabled:opacity-50 disabled:bg-slate-700"
           >
             <Send className="w-5 h-5" />
           </button>

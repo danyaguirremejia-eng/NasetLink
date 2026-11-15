@@ -8,6 +8,7 @@ export const Route = createRootRouteWithContext()({
     meta: [
       { title: 'NASETLINK' },
       { name: "monetag", content: "db54841038392d14343fcf73d78f9d9f" },
+      { name: "viewport", content: "width=device-width, initial-scale=1, maximum-scale=1" }, // <-- ESTO ES LO QUE FALTABA
     ],
   }),
   component: RootComponent,

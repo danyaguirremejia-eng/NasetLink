@@ -3,7 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, doc, updateDoc, addDoc, serverTimestamp, query, orderBy } from "firebase/firestore";
 import { toast } from "sonner";
-import { ShieldAlert, Search, CheckCircle2, BadgeCheck, Star, Ban, Loader2, Megaphone, Send, Headphones, MessageSquare, ArrowLeft } from "lucide-react";
+import { ShieldAlert, Search, CheckCircle2, BadgeCheck, Star, Ban, Loader2, Megaphone, Send, Headphones, MessageSquare, Minus, Plus } from "lucide-react";
 
 export const Route = createFileRoute("/_authed/admin")({
   head: () => ({ meta: [{ title: "Admin Panel — NASETLINK" }] }),
@@ -16,20 +16,18 @@ function AdminPage() {
   const { user } = Route.useRouteContext();
   const navigate = useNavigate();
   
-  const [activeTab, setActiveTab] = useState("users"); // users | announcements | tickets
+  const [activeTab, setActiveTab] = useState("users");
   const [users, setUsers] = useState([]);
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [updating, setUpdating] = useState(null);
 
-  // Estados para Anuncios
   const [annTitle, setAnnTitle] = useState("");
   const [annMessage, setAnnMessage] = useState("");
   const [annType, setAnnType] = useState("info");
   const [publishing, setPublishing] = useState(false);
 
-  // Estado para respuestas de tickets
   const [replyingTo, setReplyingTo] = useState(null);
   const [replyText, setReplyText] = useState("");
 
@@ -127,7 +125,6 @@ function AdminPage() {
         </div>
       </div>
 
-      {/* Tabs de Admin */}
       <div className="grid grid-cols-3 gap-2 bg-[#0F1523] p-1 rounded-xl border border-white/5">
         <button onClick={() => setActiveTab("users")} className={`py-2 text-xs font-bold rounded-lg transition ${activeTab === 'users' ? 'bg-red-500/20 text-red-400' : 'text-slate-400'}`}>Usuarios</button>
         <button onClick={() => setActiveTab("announcements")} className={`py-2 text-xs font-bold rounded-lg transition ${activeTab === 'announcements' ? 'bg-blue-500/20 text-blue-400' : 'text-slate-400'}`}>Anuncios</button>
@@ -139,7 +136,6 @@ function AdminPage() {
         </button>
       </div>
 
-      {/* TAB: USUARIOS */}
       {activeTab === "users" && (
         <>
           <div className="relative">
@@ -159,7 +155,11 @@ function AdminPage() {
                 <div className="flex flex-wrap gap-2 border-t border-white/5 pt-3">
                   <button onClick={() => updateUser(u.id, { verified: !u.verified })} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${u.verified ? 'bg-blue-500/20 text-blue-400' : 'bg-white/5 text-slate-400'}`}><BadgeCheck className="w-3.5 h-3.5" /> {u.verified ? 'Quitar Verif.' : 'Verificar'}</button>
                   <button onClick={() => updateUser(u.id, { role: u.role === 'influencer' ? 'user' : 'influencer' })} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${u.role === 'influencer' ? 'bg-yellow-500/20 text-yellow-500' : 'bg-white/5 text-slate-400'}`}><Star className="w-3.5 h-3.5" /> {u.role === 'influencer' ? 'Quitar Influ.' : 'Influencer'}</button>
-                  <button onClick={() => updateUser(u.id, { level: (u.level || 1) + 1 })} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-white/5 text-slate-400"><Star className="w-3.5 h-3.5" /> +1 Nivel</button>
+                  
+                  {/* BOTONES DE NIVEL */}
+                  <button onClick={() => updateUser(u.id, { level: Math.max(1, (u.level || 1) - 1) })} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-white/5 text-slate-400 hover:bg-white/10 transition"><Minus className="w-3.5 h-3.5" /> -1 Nivel</button>
+                  <button onClick={() => updateUser(u.id, { level: (u.level || 1) + 1 })} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-white/5 text-slate-400 hover:bg-white/10 transition"><Plus className="w-3.5 h-3.5" /> +1 Nivel</button>
+
                   <button onClick={() => updateUser(u.id, { suspended: !u.suspended })} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${u.suspended ? 'bg-red-500 text-white' : 'bg-red-500/10 text-red-500'}`}>{u.suspended ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Ban className="w-3.5 h-3.5" />}{u.suspended ? 'Reactivar' : 'Suspender'}</button>
                   {updating === u.id && <Loader2 className="w-4 h-4 animate-spin text-slate-400 ml-auto" />}
                 </div>
@@ -169,7 +169,6 @@ function AdminPage() {
         </>
       )}
 
-      {/* TAB: ANUNCIOS */}
       {activeTab === "announcements" && (
         <div className="bg-[#0F1523] border border-blue-500/20 rounded-2xl p-5">
           <div className="flex items-center gap-2 mb-4">
@@ -193,7 +192,6 @@ function AdminPage() {
         </div>
       )}
 
-      {/* TAB: SOPORTE (TICKETS) */}
       {activeTab === "tickets" && (
         <div className="space-y-4">
           {tickets.length === 0 ? (

@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { db, auth } from "@/lib/firebase";
+import { doc, onSnapshot } from "firebase/firestore";
 import { Award, Star, Trophy, Diamond, Crown, Flame, ShieldCheck, CheckCircle2, Scale, Table, History } from "lucide-react";
 
 export const Route = createFileRoute("/_authed/niveles")({
@@ -7,7 +9,7 @@ export const Route = createFileRoute("/_authed/niveles")({
   component: NivelesPage,
 });
 
-// Datos de los niveles corregidos
+// Datos de los niveles
 const LEVELS = [
   { id: 1, name: "LEVEL 1", icon: Award, reqClicks: 300, reqDays: 9, pay: "17.50", creators: "1,300", color: "text-orange-500", bg: "bg-orange-500/10", border: "border-orange-500/30" },
   { id: 2, name: "LEVEL 2", icon: Star, reqClicks: 650, reqDays: 14, pay: "19.00", creators: "7", color: "text-slate-400", bg: "bg-slate-400/10", border: "border-slate-400/30" },
@@ -18,10 +20,26 @@ const LEVELS = [
 ];
 
 function NivelesPage() {
-  const { user } = Route.useRouteContext();
-  
-  // Simulamos que el usuario está en el Nivel 1 (luego lo conectas a user.level si quieres)
-  const currentLevel = 1;
+  const [currentLevel, setCurrentLevel] = useState(1);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Escuchar el nivel en tiempo real directo desde la sesión actual
+    if (!auth.currentUser) return;
+
+    const unsub = onSnapshot(doc(db, "users", auth.currentUser.uid), (docSnap) => {
+      if (docSnap.exists()) {
+        const lvl = Number(docSnap.data().level) || 1;
+        setCurrentLevel(lvl > 6 ? 6 : lvl);
+      }
+      setLoading(false);
+    });
+
+    return () => unsub();
+  }, []);
+
+  if (loading) return <div className="text-white text-center mt-10">Cargando niveles...</div>;
+
   const levelData = LEVELS[currentLevel - 1];
 
   return (
@@ -39,27 +57,27 @@ function NivelesPage() {
       </div>
 
       {/* Tarjeta de Nivel Actual */}
-      <div className="bg-gradient-to-br from-[#1a1510] via-[#0F1523] to-[#0F1523] border border-orange-500/30 rounded-3xl p-6 relative overflow-hidden">
+      <div className={`bg-gradient-to-br from-[#1a1510] via-[#0F1523] to-[#0F1523] border ${levelData.border} rounded-3xl p-6 relative overflow-hidden`}>
         <div className="absolute top-0 right-0 w-48 h-48 bg-orange-500/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
         
         <div className="flex items-center justify-between mb-6">
-          <div className="bg-orange-500/20 p-4 rounded-2xl border border-orange-500/30">
-            <Award className="w-8 h-8 text-orange-500" />
+          <div className={`${levelData.bg} p-4 rounded-2xl border ${levelData.border}`}>
+            <levelData.icon className={`w-8 h-8 ${levelData.color}`} />
           </div>
           <div className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-center">
             <div className="flex items-center justify-center gap-1 text-xs text-slate-400 font-bold mb-1">
-              <Flame className="w-4 h-4 text-orange-500" /> Día 1/{levelData.reqDays}
+              <Flame className="w-4 h-4 text-orange-500" /> Día 1/{levelData.reqDays || '∞'}
             </div>
             <p className="text-[10px] text-slate-500 uppercase tracking-wider">Tu racha</p>
           </div>
         </div>
 
-        <p className="text-xs font-bold text-orange-500 uppercase tracking-widest mb-1">TU NIVEL</p>
+        <p className={`text-xs font-bold ${levelData.color} uppercase tracking-widest mb-1`}>TU NIVEL</p>
         <h2 className="text-5xl font-black text-white mb-2">{levelData.name}</h2>
         <p className="text-sm text-slate-300 mb-6">Ganas <strong className="text-white">${levelData.pay}</strong> por cada 1,000 clics a 6 pasos</p>
 
         <div className="bg-black/40 border border-white/5 rounded-2xl p-4">
-          <p className="text-sm text-slate-300 mb-2">Hoy llevas <strong className="text-white">0 de {levelData.reqClicks} clics válidos</strong></p>
+          <p className="text-sm text-slate-300 mb-2">Hoy llevas <strong className="text-white">0 de {levelData.reqClicks || '∞'} clics válidos</strong></p>
           <div className="flex items-center gap-2 text-xs text-slate-500">
             <Flame className="w-4 h-4 text-orange-500" />
             <p>Te faltan {levelData.reqClicks} antes de las 12:00 AM o la racha se pierde entera.</p>
@@ -75,16 +93,20 @@ function NivelesPage() {
         <p className="text-xs text-slate-400 mb-4">Cada salto pide clics válidos diarios durante días seguidos. Sin fallar ni uno.</p>
         
         <div className="flex overflow-x-auto gap-4 pb-4 no-scrollbar">
-          {LEVELS.map((lvl, index) => (
-            <div key={lvl.id} className="flex flex-col items-center shrink-0 w-24">
-              <div className={`w-14 h-14 rounded-full flex items-center justify-center border-2 ${index + 1 === currentLevel ? 'bg-orange-500 border-orange-400 text-white shadow-[0_0_20px_-5px_rgba(249,115,22,0.8)]' : 'bg-[#0F1523] border-white/10 text-slate-600'}`}>
-                <lvl.icon className="w-6 h-6" />
+          {LEVELS.map((lvl) => {
+            const isActive = lvl.id === currentLevel;
+            const isPassed = lvl.id < currentLevel;
+            return (
+              <div key={lvl.id} className="flex flex-col items-center shrink-0 w-24">
+                <div className={`w-14 h-14 rounded-full flex items-center justify-center border-2 ${isActive ? 'bg-orange-500 border-orange-400 text-white shadow-[0_0_20px_-5px_rgba(249,115,22,0.8)]' : (isPassed ? 'bg-green-500/10 border-green-500/30 text-green-500' : 'bg-[#0F1523] border-white/10 text-slate-600')}`}>
+                  <lvl.icon className="w-6 h-6" />
+                </div>
+                <p className={`text-xs font-bold mt-2 ${isActive ? 'text-white' : (isPassed ? 'text-green-500' : 'text-slate-500')}`}>{lvl.name}</p>
+                {lvl.reqClicks > 0 && <p className="text-[9px] text-slate-500 text-center mt-1">{lvl.reqClicks}/día ×<br/>{lvl.reqDays}d</p>}
+                {lvl.reqClicks === 0 && <p className="text-[9px] text-slate-500 mt-1">LA CIMA</p>}
               </div>
-              <p className={`text-xs font-bold mt-2 ${index + 1 === currentLevel ? 'text-white' : 'text-slate-500'}`}>{lvl.name}</p>
-              {lvl.reqClicks > 0 && <p className="text-[9px] text-slate-500 text-center mt-1">{lvl.reqClicks}/día ×<br/>{lvl.reqDays}d</p>}
-              {lvl.reqClicks === 0 && <p className="text-[9px] text-slate-500 mt-1">LA CIMA</p>}
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
@@ -96,40 +118,44 @@ function NivelesPage() {
         <p className="text-xs text-slate-400 mb-4">El requisito es para SUBIR desde ese nivel al siguiente.</p>
         
         <div className="space-y-4">
-          {LEVELS.map((lvl, index) => (
-            <div key={lvl.id} className={`bg-[#0F1523] border ${index + 1 === currentLevel ? 'border-orange-500/30' : 'border-white/5'} rounded-2xl p-5 relative overflow-hidden`}>
-              {index + 1 === currentLevel && (
-                <div className="absolute top-0 right-0 bg-orange-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl z-10">TU NIVEL</div>
-              )}
-              {index + 1 !== currentLevel && (
-                <div className="absolute top-0 right-0 bg-white/5 text-slate-400 text-[10px] font-bold px-3 py-1 rounded-bl-xl z-10">POR LLEGAR</div>
-              )}
-              
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${lvl.bg} ${lvl.color} border ${lvl.border}`}>
-                <lvl.icon className="w-6 h-6" />
-              </div>
-              
-              <h4 className="text-2xl font-black text-white">{lvl.name}</h4>
-              <p className="text-xs text-slate-500 mb-3">{lvl.creators} creadores</p>
-              
-              <div className="mb-4">
-                <p className={`text-2xl font-black ${lvl.color}`}>${lvl.pay}</p>
-                <p className="text-xs text-slate-400">por cada 1,000 clics a 6 pasos</p>
-              </div>
+          {LEVELS.map((lvl, index) => {
+            const isActive = lvl.id === currentLevel;
+            const isPassed = lvl.id < currentLevel;
+            return (
+              <div key={lvl.id} className={`bg-[#0F1523] border ${isActive ? lvl.border : 'border-white/5'} rounded-2xl p-5 relative overflow-hidden ${isPassed ? 'opacity-50' : 'opacity-100'}`}>
+                {isActive && (
+                  <div className="absolute top-0 right-0 bg-orange-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl z-10">TU NIVEL</div>
+                )}
+                {!isActive && !isPassed && (
+                  <div className="absolute top-0 right-0 bg-white/5 text-slate-400 text-[10px] font-bold px-3 py-1 rounded-bl-xl z-10">POR LLEGAR</div>
+                )}
+                
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${lvl.bg} ${lvl.color} border ${lvl.border}`}>
+                  <lvl.icon className="w-6 h-6" />
+                </div>
+                
+                <h4 className="text-2xl font-black text-white">{lvl.name}</h4>
+                <p className="text-xs text-slate-500 mb-3">{lvl.creators} creadores</p>
+                
+                <div className="mb-4">
+                  <p className={`text-2xl font-black ${lvl.color}`}>${lvl.pay}</p>
+                  <p className="text-xs text-slate-400">por cada 1,000 clics a 6 pasos</p>
+                </div>
 
-              {lvl.reqClicks > 0 ? (
-                <div className="bg-black/30 border border-white/5 rounded-xl p-3">
-                  <p className="text-[10px] text-slate-500 font-bold mb-1 uppercase tracking-wider">Para subir a {LEVELS[index + 1]?.name || 'MAX'}</p>
-                  <p className="text-sm text-white font-medium"><strong className="font-bold">{lvl.reqClicks}</strong> clics/día × <strong className="font-bold">{lvl.reqDays}</strong> días seguidos</p>
-                </div>
-              ) : (
-                <div className="bg-black/30 border border-white/5 rounded-xl p-3">
-                  <p className="text-[10px] text-slate-500 font-bold mb-1 uppercase tracking-wider">Nivel Máximo</p>
-                  <p className="text-sm text-white font-medium">La cima 👑</p>
-                </div>
-              )}
-            </div>
-          ))}
+                {lvl.reqClicks > 0 ? (
+                  <div className="bg-black/30 border border-white/5 rounded-xl p-3">
+                    <p className="text-[10px] text-slate-500 font-bold mb-1 uppercase tracking-wider">Para subir a {LEVELS[index + 1]?.name || 'MAX'}</p>
+                    <p className="text-sm text-white font-medium"><strong className="font-bold">{lvl.reqClicks}</strong> clics/día × <strong className="font-bold">{lvl.reqDays}</strong> días seguidos</p>
+                  </div>
+                ) : (
+                  <div className="bg-black/30 border border-white/5 rounded-xl p-3">
+                    <p className="text-[10px] text-slate-500 font-bold mb-1 uppercase tracking-wider">Nivel Máximo</p>
+                    <p className="text-sm text-white font-medium">La cima 👑</p>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -173,16 +199,22 @@ function NivelesPage() {
         <div className="bg-[#0F1523] border border-white/5 rounded-2xl overflow-hidden">
           <div className="flex bg-white/5 border-b border-white/5">
             <div className="flex-1 p-3 text-xs font-bold text-slate-400">Pasos</div>
-            <div className="flex-1 p-3 text-xs font-bold text-orange-500 text-right bg-orange-500/5">{levelData.name}</div>
+            <div className={`flex-1 p-3 text-xs font-bold ${levelData.color} text-right bg-white/5`}>{levelData.name}</div>
           </div>
-          {[2, 3, 4, 5, 6].map((step) => (
-            <div key={step} className="flex border-b border-white/5 last:border-0">
-              <div className="flex-1 p-3 text-sm font-medium text-slate-300">{step} pasos</div>
-              <div className="flex-1 p-3 text-sm font-bold text-white text-right bg-orange-500/5">
-                ${step === 2 ? "4.00" : step === 3 ? "9.00" : step === 4 ? "12.50" : step === 5 ? "15.80" : "17.50"}
+          {[2, 3, 4, 5, 6].map((step) => {
+            const base = step === 2 ? 4.00 : step === 3 ? 9.00 : step === 4 ? 12.50 : step === 5 ? 15.80 : 17.50;
+            const multiplier = 1 + ((currentLevel - 1) * 0.1);
+            const price = (base * multiplier).toFixed(2);
+            
+            return (
+              <div key={step} className="flex border-b border-white/5 last:border-0">
+                <div className="flex-1 p-3 text-sm font-medium text-slate-300">{step} pasos</div>
+                <div className={`flex-1 p-3 text-sm font-bold text-white text-right bg-white/5`}>
+                  ${price}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 

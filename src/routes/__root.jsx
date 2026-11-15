@@ -9,11 +9,13 @@ export const Route = createRootRouteWithContext()({
       { title: 'NASETLINK' },
       { name: "monetag", content: "db54841038392d14343fcf73d78f9d9f" },
       { name: "viewport", content: "width=device-width, initial-scale=1, maximum-scale=1" },
+      { name: "theme-color", content: "#0B0F19" },
     ],
     links: [
-      { rel: "icon", type: "image/png", href: "/logo.png?v=2" },
-      { rel: "apple-touch-icon", href: "/logo.png?v=2" },
-      { rel: "shortcut icon", href: "/logo.png?v=2" }
+      { rel: "icon", type: "image/png", href: "/logo.png?v=3" },
+      { rel: "apple-touch-icon", href: "/logo.png?v=3" },
+      { rel: "shortcut icon", href: "/logo.png?v=3" },
+      { rel: "manifest", href: "/manifest.json" }
     ]
   }),
   component: RootComponent,

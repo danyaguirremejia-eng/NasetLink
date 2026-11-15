@@ -5,7 +5,7 @@ import { collection, query, orderBy, getDocs, deleteDoc, doc } from "firebase/fi
 import { toast } from "sonner";
 import { ArrowLeft, MessageSquare, Lightbulb, Trash2, Users } from "lucide-react";
 
-export const Route = createFileRoute("/_authed/admin/comunidad")({
+export const Route = createFileRoute("/_authed/admin-comunidad")({
   head: () => ({ meta: [{ title: "Comunidad — Admin" }] }),
   component: AdminComunidadPage,
 });

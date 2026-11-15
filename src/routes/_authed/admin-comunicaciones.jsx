@@ -5,7 +5,7 @@ import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { toast } from "sonner";
 import { ArrowLeft, Send, Megaphone, Bell } from "lucide-react";
 
-export const Route = createFileRoute("/_authed/admin/comunicaciones")({
+export const Route = createFileRoute("/_authed/admin-comunicaciones")({
   head: () => ({ meta: [{ title: "Comunicaciones — Admin" }] }),
   component: AdminComunicacionesPage,
 });

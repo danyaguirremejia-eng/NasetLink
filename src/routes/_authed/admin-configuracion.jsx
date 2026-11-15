@@ -5,7 +5,7 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import { toast } from "sonner";
 import { ArrowLeft, Save, Settings, ShieldAlert, DollarSign } from "lucide-react";
 
-export const Route = createFileRoute("/_authed/admin/configuracion")({
+export const Route = createFileRoute("/_authed/admin-configuracion")({
   head: () => ({ meta: [{ title: "Configuración — NASETLINK" }] }),
   component: AdminConfigPage,
 });

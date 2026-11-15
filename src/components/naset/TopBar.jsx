@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { Clock, MessageCircle, Bell, Flame, User, Ghost, Smile, Gamepad2, Rocket, Shield, Zap, Star, Heart, Skull, Bot, Cat } from "lucide-react";
 import { db, auth } from "@/lib/firebase";
 import { doc, onSnapshot, collection, query, where, orderBy, updateDoc, limit } from "firebase/firestore";
@@ -10,6 +11,7 @@ function AvatarDisplay({ name, className }) {
 }
 
 export default function TopBar() {
+  const navigate = useNavigate();
   const [time, setTime] = useState(new Date());
   const [userData, setUserData] = useState(null);
   const [notifications, setNotifications] = useState([]);
@@ -19,7 +21,6 @@ export default function TopBar() {
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 60000);
     
-    // Pedir permiso para notificaciones del navegador
     if ("Notification" in window && Notification.permission === "default") {
       Notification.requestPermission();
     }
@@ -46,14 +47,10 @@ export default function TopBar() {
       snap.forEach(doc => notifs.push({ id: doc.id, ...doc.data() }));
       setNotifications(notifs);
 
-      // Lógica para lanzar la notificación nativa
       if (notifs.length > 0) {
         const newest = notifs[0];
-        // Si la notificación es nueva (no la última que vimos) y no ha sido leída
         if (newest.id !== lastNotifId && !newest.read) {
           setLastNotifId(newest.id);
-          
-          // Lanzar la notificación del sistema si ya dio permiso
           if ("Notification" in window && Notification.permission === "granted") {
             new Notification(newest.title, {
               body: newest.message,
@@ -95,7 +92,11 @@ export default function TopBar() {
           <span>{formattedTime}</span>
         </div>
 
-        <button className="relative p-1.5 text-slate-400 hover:text-white transition bg-white/5 rounded-full border border-white/5">
+        {/* BOTÓN DEL CHAT CONECTADO */}
+        <button 
+          onClick={() => navigate({ to: "/chat" })}
+          className="relative p-1.5 text-slate-400 hover:text-white transition bg-white/5 rounded-full border border-white/5"
+        >
           <MessageCircle className="w-4 h-4" />
           <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-green-500 rounded-full"></span>
         </button>

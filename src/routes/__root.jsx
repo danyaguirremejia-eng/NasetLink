@@ -19,7 +19,7 @@ function RootComponent() {
       <head>
         <HeadContent />
       </head>
-      <body className="bg-[#0B0F19] text-white font-sans antialiased">
+      <body className="bg-[#0B0F19] text-white font-sans antialiased overflow-x-hidden">
         <AuthProvider>
           <Outlet />
         </AuthProvider>

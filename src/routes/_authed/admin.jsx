@@ -193,7 +193,7 @@ function AdminPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-4 sm:grid-cols-7 gap-1 bg-[#0F1523] p-1 rounded-xl border border-white/5 overflow-x-auto">
+      <div className="grid flex gap-1 overflow-x-auto whitespace-nowrap scrollbar-hide gap-1 bg-[#0F1523] p-1 rounded-xl border border-white/5 overflow-x-auto">
         <button onClick={() => setActiveTab("users")} className={`py-2 text-[10px] font-bold rounded-lg transition ${activeTab === 'users' ? 'bg-red-500/20 text-red-400' : 'text-slate-400'}`}>Usuarios</button>
         <button onClick={() => setActiveTab("links")} className={`py-2 text-[10px] font-bold rounded-lg transition ${activeTab === 'links' ? 'bg-orange-500/20 text-orange-400' : 'text-slate-400'}`}>Enlaces</button>
         <button onClick={() => setActiveTab("withdrawals")} className={`py-2 text-[10px] font-bold rounded-lg transition relative ${activeTab === 'withdrawals' ? 'bg-yellow-500/20 text-yellow-400' : 'text-slate-400'}`}>
@@ -202,7 +202,7 @@ function AdminPage() {
         <button onClick={() => setActiveTab("finance")} className={`py-2 text-[10px] font-bold rounded-lg transition ${activeTab === 'finance' ? 'bg-emerald-500/20 text-emerald-400' : 'text-slate-400'}`}>Finanzas</button>
         {isSuperStaff && <button onClick={() => setActiveTab("announcements")} className={`py-2 text-[10px] font-bold rounded-lg transition ${activeTab === 'announcements' ? 'bg-blue-500/20 text-blue-400' : 'text-slate-400'}`}>Anuncios</button>}
         <button onClick={() => setActiveTab("tickets")} className={`py-2 text-[10px] font-bold rounded-lg transition relative ${activeTab === 'tickets' ? 'bg-green-500/20 text-green-400' : 'text-slate-400'}`}>Soporte</button>
-        {isSuperStaff && <button onClick={() => setActiveTab("audit")} className={`py-2 text-[10px] font-bold rounded-lg transition ${activeTab === 'audit' ? 'bg-purple-500/20 text-purple-400' : 'text-slate-400'}`}>Auditoría</button>}
+        {isSuperStaff && <button onClick={() => setActiveTab("audit")} className={`py-2 text-[10px] font-bold rounded-lg transition ${activeTab === 'audit' ? 'bg-purple-500/20 text-purple-400' : 'text-slate-400'}`}>Auditoría</button><button onClick={() => navigate({ to: "/admin/configuracion" })} className="py-2 px-3 text-[10px] font-bold rounded-lg transition bg-white/5 text-slate-300 hover:bg-white/10">Configuración</button><button onClick={() => navigate({ to: "/admin/comunidad" })} className="py-2 px-3 text-[10px] font-bold rounded-lg transition bg-white/5 text-slate-300 hover:bg-white/10">Comunidad</button><button onClick={() => navigate({ to: "/admin/comunicaciones" })} className="py-2 px-3 text-[10px] font-bold rounded-lg transition bg-white/5 text-slate-300 hover:bg-white/10">Mensajes</button><button onClick={() => navigate({ to: "/admin/fraude" })} className="py-2 px-3 text-[10px] font-bold rounded-lg transition bg-white/5 text-red-400 hover:bg-red-500/10">Fraude</button><button onClick={() => navigate({ to: "/admin/red" })} className="py-2 px-3 text-[10px] font-bold rounded-lg transition bg-white/5 text-blue-400 hover:bg-blue-500/10">Red</button><button onClick={() => navigate({ to: "/admin/creadores" })} className="py-2 px-3 text-[10px] font-bold rounded-lg transition bg-white/5 text-yellow-400 hover:bg-yellow-500/10">Creadores</button>}
       </div>
 
       {activeTab === "users" && (

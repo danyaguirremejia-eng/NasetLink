@@ -114,7 +114,7 @@ function DashboardPage() {
             <p className="text-xs text-slate-400 leading-relaxed mb-3">
               Ahí avisamos los pagos, los cambios de eCPM y los sorteos <strong className="text-white">antes que en ningún lado</strong>.
             </p>
-            <a href="#" className="bg-green-500 hover:bg-green-600 text-white text-sm font-semibold py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition w-full max-w-[200px]">
+            <a href="https://chat.whatsapp.com/JAqf2gVEFlz59saw6MVveK?s=cl&p=a&iam=2" target="_blank" rel="noopener noreferrer" className="bg-green-500 hover:bg-green-600 text-white text-sm font-semibold py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition w-full max-w-[200px]">
               <MessageCircle className="w-4 h-4" /> Unirme ahora
             </a>
           </div>

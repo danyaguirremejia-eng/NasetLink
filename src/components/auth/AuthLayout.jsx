@@ -1,17 +1,35 @@
-// Full-screen card shared by the auth pages; it sets its own color tokens so it stays readable under any theme.
-export function AuthLayout({ icon: Icon, title, subtitle, footer, children }) {
+import { Link } from "@tanstack/react-router";
+
+export function AuthLayout({ icon: Icon, title, subtitle, children }) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-8 text-foreground">
-      <div className="w-full max-w-md">
-        <div className="mb-8 text-center">
-          <div className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-primary">
-            <Icon className="h-7 w-7 text-primary-foreground" aria-hidden="true" />
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
-          {subtitle && <p className="mt-2 text-muted-foreground">{subtitle}</p>}
+    <div className="min-h-screen bg-[#0B0F19] flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden text-white">
+      {/* Fondo con efecto de cuadrícula */}
+      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5 pointer-events-none"></div>
+      
+      <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
+        
+        {/* NUEVO LOGO MORADO */}
+        <div className="flex flex-col items-center justify-center mb-8">
+          <img 
+            src="/logo.png" 
+            alt="NASETLINK" 
+            className="w-20 h-20 object-contain mb-4 drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]" 
+          />
+          <h2 className="text-center text-3xl font-black tracking-tighter">
+            NASET<span className="text-purple-500">LINK</span>
+          </h2>
         </div>
-        <div className="rounded-2xl border border-border bg-card p-8 text-card-foreground shadow-sm">{children}</div>
-        {footer && <p className="mt-6 text-center text-sm text-muted-foreground">{footer}</p>}
+
+        {/* Tarjeta con el formulario */}
+        <div className="bg-[#0F1523] py-8 px-4 shadow-2xl sm:rounded-2xl sm:px-10 border border-white/5">
+          <div className="mb-6 text-center">
+            <h2 className="text-2xl font-bold text-white mb-2">{title}</h2>
+            <p className="text-sm text-slate-400">{subtitle}</p>
+          </div>
+          
+          {children}
+        </div>
+
       </div>
     </div>
   );

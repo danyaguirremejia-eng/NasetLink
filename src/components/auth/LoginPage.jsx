@@ -7,16 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { safeReturnTo } from "@/lib/authReturnTo";
 import { auth, googleProvider } from "../../lib/firebase";
-import { signInWithEmailAndPassword, signInWithPopup, setPersistence, browserLocalPersistence, browserSessionPersistence } from "firebase/auth";
+import { signInWithEmailAndPassword, signInWithPopup, setPersistence, browserLocalPersistence } from "firebase/auth";
 
 export function LoginPage() {
   const navigate = useNavigate();
   const rawReturnTo = safeReturnTo();
-  
-  // CORRECCIÓN: Si es "/" o "/login", lo forzamos al dashboard
-  const targetRoute = (rawReturnTo && rawReturnTo !== "/" && rawReturnTo !== "/login") 
-    ? rawReturnTo 
-    : "/dashboard";
+  const targetRoute = (rawReturnTo && rawReturnTo !== "/" && rawReturnTo !== "/login") ? rawReturnTo : "/dashboard";
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -29,7 +25,8 @@ export function LoginPage() {
     setError("");
     setBusy(true);
     try {
-      await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
+      // FORZAMOS SIEMPRE LA PERSISTENCIA LOCAL
+      await setPersistence(auth, browserLocalPersistence);
       await signInWithEmailAndPassword(auth, email, password);
       
       setTimeout(() => {

@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { db, auth } from "@/lib/firebase";
 import { collection, query, where, getDocs, addDoc, serverTimestamp, doc, getDoc, setDoc } from "firebase/firestore";
 import { toast } from "sonner";
-import { Wallet, Clock, Calendar, Send, CheckCircle2, Hourglass, ChevronDown, History, AlertCircle } from "lucide-react";
+import { Wallet, Clock, Calendar, Send, CheckCircle2, Hourglass, ChevronDown, History, AlertCircle, XCircle } from "lucide-react";
 
 export const Route = createFileRoute("/_authed/retiros")({
   head: () => ({ meta: [{ title: "Retiros — NASETLINK" }] }),
@@ -21,6 +21,9 @@ function WithdrawalsPage() {
   const [loading, setLoading] = useState(true);
   const [userProfile, setUserProfile] = useState(null);
   
+  // NUEVO ESTADO PARA EL HISTORIAL
+  const [withdrawals, setWithdrawals] = useState([]);
+
   const [amount, setAmount] = useState("");
   const [method, setMethod] = useState("Binance (USDT)");
   const [accountInput, setAccountInput] = useState("");
@@ -41,13 +44,20 @@ function WithdrawalsPage() {
       let wTotal = 0;
       let pTotal = 0;
       let paidTotal = 0;
+      let wList = [];
       
       wSnap.forEach(doc => {
         const wData = doc.data();
+        wList.push({ id: doc.id, ...wData }); // GUARDAMOS LOS DATOS
+        
         if (wData.status === 'pending') { pTotal += wData.amount; wTotal += wData.amount; }
         if (wData.status === 'paid') { paidTotal += wData.amount; wTotal += wData.amount; }
       });
       
+      // Ordenamos del más reciente al más antiguo
+      wList.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
+      
+      setWithdrawals(wList); // ACTUALIZAMOS EL HISTORIAL
       setPendingAmount(pTotal);
       setPaidAmount(paidTotal);
       setBalance(Math.max(0, earnings - wTotal));
@@ -221,9 +231,33 @@ function WithdrawalsPage() {
         </div>
       </div>
 
-      <div className="bg-[#0F1523]/60 backdrop-blur-xl border border-white/5 rounded-3xl p-6 shadow-lg text-center">
-        <div className="flex items-center gap-2 mb-4 justify-center"><History className="w-5 h-5 text-purple-500" /><h3 className="font-bold text-white">Historial</h3></div>
-        <p className="text-sm text-slate-500 py-6">Aún no tienes retiros.</p>
+      {/* HISTORIAL ACTUALIZADO */}
+      <div className="bg-[#0F1523]/60 backdrop-blur-xl border border-white/5 rounded-3xl p-6 shadow-lg">
+        <div className="flex items-center gap-2 mb-5 justify-center">
+          <History className="w-5 h-5 text-purple-500" />
+          <h3 className="font-bold text-white">Historial</h3>
+        </div>
+        
+        {withdrawals.length === 0 ? (
+          <p className="text-sm text-slate-500 text-center py-6">Aún no tienes retiros.</p>
+        ) : (
+          <div className="space-y-3">
+            {withdrawals.map((w) => (
+              <div key={w.id} className="bg-black/20 border border-white/5 rounded-2xl p-4 flex justify-between items-center">
+                <div>
+                  <p className="text-sm font-bold text-white">${w.amount.toFixed(2)} <span className="text-[10px] text-slate-500 font-normal">USD</span></p>
+                  <p className="text-[10px] text-slate-400 mt-1">{w.method} · {w.account}</p>
+                  <p className="text-[9px] text-slate-600 mt-0.5">{w.createdAt ? new Date(w.createdAt.toMillis()).toLocaleDateString() : 'Reciente'}</p>
+                </div>
+                <div>
+                  {w.status === 'paid' && <span className="flex items-center gap-1 text-[10px] font-bold text-green-500 bg-green-500/10 px-2 py-1 rounded-lg"><CheckCircle2 className="w-3 h-3" /> PAGADO</span>}
+                  {w.status === 'pending' && <span className="flex items-center gap-1 text-[10px] font-bold text-yellow-500 bg-yellow-500/10 px-2 py-1 rounded-lg"><Hourglass className="w-3 h-3" /> PENDIENTE</span>}
+                  {w.status === 'rejected' && <span className="flex items-center gap-1 text-[10px] font-bold text-red-500 bg-red-500/10 px-2 py-1 rounded-lg"><XCircle className="w-3 h-3" /> RECHAZADO</span>}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

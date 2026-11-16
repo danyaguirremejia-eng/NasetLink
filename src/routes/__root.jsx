@@ -12,9 +12,10 @@ export const Route = createRootRouteWithContext()({
       { name: "theme-color", content: "#0B0F19" },
     ],
     links: [
-      { rel: "icon", type: "image/png", href: "/logo.png?v=3" },
-      { rel: "apple-touch-icon", href: "/logo.png?v=3" },
-      { rel: "shortcut icon", href: "/logo.png?v=3" },
+      // AQUÍ ESTÁ EL TRUCO: Le pusimos v=99 para que el celular piense que es un archivo nuevo
+      { rel: "icon", type: "image/png", href: "/logo.png?v=99" },
+      { rel: "apple-touch-icon", href: "/logo.png?v=99" },
+      { rel: "shortcut icon", href: "/logo.png?v=99" },
       { rel: "manifest", href: "/manifest.json" }
     ]
   }),

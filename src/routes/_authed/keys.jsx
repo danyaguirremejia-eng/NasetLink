@@ -204,7 +204,7 @@ function KeysPage() {
             <label className="block text-sm font-semibold text-white mb-2">Nombre del enlace <span className="text-slate-500 font-normal">— opcional</span></label>
             <div className="relative">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold">@</span>
-              <input type="text" value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="mitienda" className="w-full bg-black/30 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-white placeholder-slate-600 outline-none focus:border-blue-500" />
+              <input type="text" value={slug} onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/ /g, "-"))} placeholder="mitienda" className="w-full bg-black/30 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-white placeholder-slate-600 outline-none focus:border-blue-500" />
             </div>
             <p className="text-xs text-slate-500 mt-2">Quedará como <span className="text-slate-400">{window.location.host}/s/{slug || "aleatorio"}</span>.</p>
           </div>

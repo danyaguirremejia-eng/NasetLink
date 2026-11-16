@@ -253,7 +253,7 @@ function DashboardPage() {
         </div>
       </div>
 
-      <LinksTable links={links} onCopy={() => handleCopy(`${domain}/s/${links.short_code}`)} />
+      <LinksTable links={links} onCopy={(link) => handleCopy(`${domain}/s/${link.short_code}`)} />
 
       <div className="bg-[#0F1523] border border-white/5 rounded-2xl p-4 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">

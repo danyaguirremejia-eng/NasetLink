@@ -112,7 +112,7 @@ function CreateLinkPage() {
             <input
               type="text"
               value={slug}
-              onChange={(e) => setSlug(e.target.value)}
+              onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/ /g, "-"))}
               placeholder="mitienda"
               className="w-full bg-black/30 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-white placeholder-slate-600 outline-none focus:border-blue-500 transition-colors"
             />

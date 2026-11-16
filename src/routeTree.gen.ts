@@ -17,6 +17,12 @@ import { Route as MfaRouteImport } from './routes/mfa'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthedAdminRouteImport } from './routes/_authed/admin'
+import { Route as AuthedAdminComunicacionesRouteImport } from './routes/_authed/admin-comunicaciones'
+import { Route as AuthedAdminComunidadRouteImport } from './routes/_authed/admin-comunidad'
+import { Route as AuthedAdminConfiguracionRouteImport } from './routes/_authed/admin-configuracion'
+import { Route as AuthedAdminCreadoresRouteImport } from './routes/_authed/admin-creadores'
+import { Route as AuthedAdminFraudeRouteImport } from './routes/_authed/admin-fraude'
+import { Route as AuthedAdminRedRouteImport } from './routes/_authed/admin-red'
 import { Route as AuthedAnunciosRouteImport } from './routes/_authed/anuncios'
 import { Route as AuthedApiRouteImport } from './routes/_authed/api'
 import { Route as AuthedAyudaRouteImport } from './routes/_authed/ayuda'
@@ -76,6 +82,38 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const AuthedAdminRoute = AuthedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedAdminComunicacionesRoute =
+  AuthedAdminComunicacionesRouteImport.update({
+    id: '/admin-comunicaciones',
+    path: '/admin-comunicaciones',
+    getParentRoute: () => AuthedRoute,
+  } as any)
+const AuthedAdminComunidadRoute = AuthedAdminComunidadRouteImport.update({
+  id: '/admin-comunidad',
+  path: '/admin-comunidad',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedAdminConfiguracionRoute =
+  AuthedAdminConfiguracionRouteImport.update({
+    id: '/admin-configuracion',
+    path: '/admin-configuracion',
+    getParentRoute: () => AuthedRoute,
+  } as any)
+const AuthedAdminCreadoresRoute = AuthedAdminCreadoresRouteImport.update({
+  id: '/admin-creadores',
+  path: '/admin-creadores',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedAdminFraudeRoute = AuthedAdminFraudeRouteImport.update({
+  id: '/admin-fraude',
+  path: '/admin-fraude',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedAdminRedRoute = AuthedAdminRedRouteImport.update({
+  id: '/admin-red',
+  path: '/admin-red',
   getParentRoute: () => AuthedRoute,
 } as any)
 const AuthedAnunciosRoute = AuthedAnunciosRouteImport.update({
@@ -192,6 +230,12 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthedAdminRoute
+  '/admin-comunicaciones': typeof AuthedAdminComunicacionesRoute
+  '/admin-comunidad': typeof AuthedAdminComunidadRoute
+  '/admin-configuracion': typeof AuthedAdminConfiguracionRoute
+  '/admin-creadores': typeof AuthedAdminCreadoresRoute
+  '/admin-fraude': typeof AuthedAdminFraudeRoute
+  '/admin-red': typeof AuthedAdminRedRoute
   '/anuncios': typeof AuthedAnunciosRoute
   '/api': typeof AuthedApiRoute
   '/ayuda': typeof AuthedAyudaRoute
@@ -222,6 +266,12 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthedAdminRoute
+  '/admin-comunicaciones': typeof AuthedAdminComunicacionesRoute
+  '/admin-comunidad': typeof AuthedAdminComunidadRoute
+  '/admin-configuracion': typeof AuthedAdminConfiguracionRoute
+  '/admin-creadores': typeof AuthedAdminCreadoresRoute
+  '/admin-fraude': typeof AuthedAdminFraudeRoute
+  '/admin-red': typeof AuthedAdminRedRoute
   '/anuncios': typeof AuthedAnunciosRoute
   '/api': typeof AuthedApiRoute
   '/ayuda': typeof AuthedAyudaRoute
@@ -254,6 +304,12 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authed/admin': typeof AuthedAdminRoute
+  '/_authed/admin-comunicaciones': typeof AuthedAdminComunicacionesRoute
+  '/_authed/admin-comunidad': typeof AuthedAdminComunidadRoute
+  '/_authed/admin-configuracion': typeof AuthedAdminConfiguracionRoute
+  '/_authed/admin-creadores': typeof AuthedAdminCreadoresRoute
+  '/_authed/admin-fraude': typeof AuthedAdminFraudeRoute
+  '/_authed/admin-red': typeof AuthedAdminRedRoute
   '/_authed/anuncios': typeof AuthedAnunciosRoute
   '/_authed/api': typeof AuthedApiRoute
   '/_authed/ayuda': typeof AuthedAyudaRoute
@@ -286,6 +342,12 @@ export interface FileRouteTypes {
     | '/register'
     | '/reset-password'
     | '/admin'
+    | '/admin-comunicaciones'
+    | '/admin-comunidad'
+    | '/admin-configuracion'
+    | '/admin-creadores'
+    | '/admin-fraude'
+    | '/admin-red'
     | '/anuncios'
     | '/api'
     | '/ayuda'
@@ -316,6 +378,12 @@ export interface FileRouteTypes {
     | '/register'
     | '/reset-password'
     | '/admin'
+    | '/admin-comunicaciones'
+    | '/admin-comunidad'
+    | '/admin-configuracion'
+    | '/admin-creadores'
+    | '/admin-fraude'
+    | '/admin-red'
     | '/anuncios'
     | '/api'
     | '/ayuda'
@@ -347,6 +415,12 @@ export interface FileRouteTypes {
     | '/register'
     | '/reset-password'
     | '/_authed/admin'
+    | '/_authed/admin-comunicaciones'
+    | '/_authed/admin-comunidad'
+    | '/_authed/admin-configuracion'
+    | '/_authed/admin-creadores'
+    | '/_authed/admin-fraude'
+    | '/_authed/admin-red'
     | '/_authed/anuncios'
     | '/_authed/api'
     | '/_authed/ayuda'
@@ -440,6 +514,48 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AuthedAdminRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/admin-comunicaciones': {
+      id: '/_authed/admin-comunicaciones'
+      path: '/admin-comunicaciones'
+      fullPath: '/admin-comunicaciones'
+      preLoaderRoute: typeof AuthedAdminComunicacionesRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/admin-comunidad': {
+      id: '/_authed/admin-comunidad'
+      path: '/admin-comunidad'
+      fullPath: '/admin-comunidad'
+      preLoaderRoute: typeof AuthedAdminComunidadRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/admin-configuracion': {
+      id: '/_authed/admin-configuracion'
+      path: '/admin-configuracion'
+      fullPath: '/admin-configuracion'
+      preLoaderRoute: typeof AuthedAdminConfiguracionRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/admin-creadores': {
+      id: '/_authed/admin-creadores'
+      path: '/admin-creadores'
+      fullPath: '/admin-creadores'
+      preLoaderRoute: typeof AuthedAdminCreadoresRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/admin-fraude': {
+      id: '/_authed/admin-fraude'
+      path: '/admin-fraude'
+      fullPath: '/admin-fraude'
+      preLoaderRoute: typeof AuthedAdminFraudeRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/admin-red': {
+      id: '/_authed/admin-red'
+      path: '/admin-red'
+      fullPath: '/admin-red'
+      preLoaderRoute: typeof AuthedAdminRedRouteImport
       parentRoute: typeof AuthedRoute
     }
     '/_authed/anuncios': {
@@ -594,6 +710,12 @@ declare module '@tanstack/react-router' {
 
 interface AuthedRouteChildren {
   AuthedAdminRoute: typeof AuthedAdminRoute
+  AuthedAdminComunicacionesRoute: typeof AuthedAdminComunicacionesRoute
+  AuthedAdminComunidadRoute: typeof AuthedAdminComunidadRoute
+  AuthedAdminConfiguracionRoute: typeof AuthedAdminConfiguracionRoute
+  AuthedAdminCreadoresRoute: typeof AuthedAdminCreadoresRoute
+  AuthedAdminFraudeRoute: typeof AuthedAdminFraudeRoute
+  AuthedAdminRedRoute: typeof AuthedAdminRedRoute
   AuthedAnunciosRoute: typeof AuthedAnunciosRoute
   AuthedApiRoute: typeof AuthedApiRoute
   AuthedAyudaRoute: typeof AuthedAyudaRoute
@@ -615,6 +737,12 @@ interface AuthedRouteChildren {
 
 const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedAdminRoute: AuthedAdminRoute,
+  AuthedAdminComunicacionesRoute: AuthedAdminComunicacionesRoute,
+  AuthedAdminComunidadRoute: AuthedAdminComunidadRoute,
+  AuthedAdminConfiguracionRoute: AuthedAdminConfiguracionRoute,
+  AuthedAdminCreadoresRoute: AuthedAdminCreadoresRoute,
+  AuthedAdminFraudeRoute: AuthedAdminFraudeRoute,
+  AuthedAdminRedRoute: AuthedAdminRedRoute,
   AuthedAnunciosRoute: AuthedAnunciosRoute,
   AuthedApiRoute: AuthedApiRoute,
   AuthedAyudaRoute: AuthedAyudaRoute,

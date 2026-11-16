@@ -14,6 +14,7 @@ function RedirectPage() {
   useEffect(() => {
     const redirect = async () => {
       try {
+        // 1. Buscar el link
         const q = query(collection(db, "links"), where("short_code", "==", code));
         const snap = await getDocs(q);
 
@@ -25,25 +26,27 @@ function RedirectPage() {
         const linkDoc = snap.docs[0];
         const linkData = linkDoc.data();
 
+        // 2. Sumar el clic
         await updateDoc(doc(db, "links", linkDoc.id), { clicks: increment(1) });
         
         setStatus("Generando pasos de seguridad...");
         
-        const response = await fetch(`/api/shorten?url=${encodeURIComponent(linkData.original_url)}`);
+        // 3. Llamar a GPLinks DIRECTO desde aquí
+        const apiToken = "773d3c79ed712d7b6faf6f568293fd7d84e93fad";
+        const gplinksUrl = `https://api.gplinks.com/api?api=${apiToken}&url=${encodeURIComponent(linkData.original_url)}`;
         
-        if (!response.ok) {
-           throw new Error(`Servidor respondió: ${response.status}`);
-        }
-
+        const response = await fetch(gplinksUrl);
         const data = await response.json();
 
-        if (data.url) {
+        if (data.status === 'success' && data.shortenedUrl) {
           setStatus("Redirigiendo...");
           setTimeout(() => {
-            window.location.href = data.url;
-          }, 1000);
+            window.location.href = data.shortenedUrl;
+          }, 800);
         } else {
-          throw new Error("GPLinks no devolvió un enlace válido");
+          // Si GPLinks falla, lo mandamos directo al destino para no romper el link
+          console.log("Error GPLinks:", data);
+          window.location.href = linkData.original_url;
         }
 
       } catch (error) {

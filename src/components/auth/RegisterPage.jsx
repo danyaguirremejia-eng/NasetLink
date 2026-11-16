@@ -22,11 +22,13 @@ export function RegisterPage() {
   const [channel, setChannel] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [acceptTerms, setAcceptTerms] = useState(false);
 
   async function submit(e) {
     e.preventDefault();
     setError("");
     
+    if (!acceptTerms) return setError("Debes aceptar los términos y condiciones.");
     if (password !== confirmPassword) {
       return setError("Las contraseñas no coinciden.");
     }

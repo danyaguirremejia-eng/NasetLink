@@ -110,6 +110,13 @@ function LandingPage() {
         </section>
 
       </main>
+<footer className="border-t border-white/5 py-8 text-center text-xs text-slate-500">
+  <div className="flex justify-center gap-4 mb-2">
+    <Link to="/terminos" className="hover:text-white transition">Términos y Condiciones</Link>
+    <Link to="/privacidad" className="hover:text-white transition">Privacidad</Link>
+  </div>
+  <p>© 2026 NASETLINK. Todos los derechos reservados.</p>
+</footer>
     </div>
   )
 }

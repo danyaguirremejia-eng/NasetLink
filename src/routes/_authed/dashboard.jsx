@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import LinksTable from "@/components/naset/LinksTable";
-import { db } from "@/lib/firebase";
+import { db, auth } from "@/lib/firebase";
 import { collection, query, where, getDocs, doc, onSnapshot } from "firebase/firestore";
 import { Clock, MessageCircle, TrendingUp, Wallet, Hourglass, Award, Gift, Copy, X, Flame, BadgeCheck, Star } from "lucide-react";
 
@@ -25,23 +25,24 @@ function DashboardPage() {
   const [totalClicks, setTotalClicks] = useState(0);
   const [totalEarnings, setTotalEarnings] = useState(0);
   const [loadingData, setLoadingData] = useState(true);
+  const [userData, setUserData] = useState(null);
+  const [globalSettings, setGlobalSettings] = useState({ ecpmBase: 1.5 });
   
   const [showPromo, setShowPromo] = useState(true);
-  
-  // Datos del usuario en tiempo real
-  const [userData, setUserData] = useState(null);
 
   useEffect(() => {
     if (!user) return;
 
-    // 1. Escuchar datos del usuario en tiempo real (para nivel, verificado, etc)
     const unsubUser = onSnapshot(doc(db, "users", user.uid), (docSnap) => {
+      if (docSnap.exists()) setUserData(docSnap.data());
+    });
+
+    const unsubSettings = onSnapshot(doc(db, "settings", "global"), (docSnap) => {
       if (docSnap.exists()) {
-        setUserData(docSnap.data());
+        setGlobalSettings({ ecpmBase: docSnap.data().ecpmBase || 1.5 });
       }
     });
 
-    // 2. Cargar enlaces
     const fetchData = async () => {
       setLoadingData(true);
       try {
@@ -72,7 +73,7 @@ function DashboardPage() {
 
     fetchData();
 
-    return () => unsubUser();
+    return () => { unsubUser(); unsubSettings(); };
   }, [user]);
 
   const handleCopy = async (text) => {
@@ -114,7 +115,7 @@ function DashboardPage() {
             <p className="text-xs text-slate-400 leading-relaxed mb-3">
               Ahí avisamos los pagos, los cambios de eCPM y los sorteos <strong className="text-white">antes que en ningún lado</strong>.
             </p>
-            <a href="https://chat.whatsapp.com/JAqf2gVEFlz59saw6MVveK?s=cl&p=a&iam=2" target="_blank" rel="noopener noreferrer" className="bg-green-500 hover:bg-green-600 text-white text-sm font-semibold py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition w-full max-w-[200px]">
+            <a href="https://chat.whatsapp.com/JAqf2gVEFlz59saw6MVveK" target="_blank" rel="noopener noreferrer" className="bg-green-500 hover:bg-green-600 text-white text-sm font-semibold py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition w-full max-w-[200px]">
               <MessageCircle className="w-4 h-4" /> Unirme ahora
             </a>
           </div>
@@ -135,7 +136,7 @@ function DashboardPage() {
 
       <div>
         <div className="flex items-center gap-2 mb-3">
-          <div className="w-1 h-4 bg-blue-500 rounded-full"></div>
+          <div className="w-1 h-4 bg-purple-500 rounded-full"></div>
           <h2 className="font-bold text-lg text-white">Resumen</h2>
         </div>
 
@@ -183,7 +184,6 @@ function DashboardPage() {
         </div>
       </div>
 
-      {/* Tarjeta de Nivel Dinámica */}
       <div className="bg-[#0F1523] border border-white/5 rounded-2xl p-5">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">
@@ -213,7 +213,7 @@ function DashboardPage() {
             <span className="text-xs text-slate-400 font-medium">300/día × 9 días</span>
           </div>
           <div className="w-full bg-white/10 h-2 rounded-full overflow-hidden">
-            <div className="bg-blue-500 h-full rounded-full" style={{ width: `${Math.min((totalClicks/300)*100, 100)}%` }}></div>
+            <div className="bg-purple-500 h-full rounded-full" style={{ width: `${Math.min((totalClicks/300)*100, 100)}%` }}></div>
           </div>
           <p className="text-xs text-slate-400 mt-2">Te faltan <strong className="text-white">{Math.max(300 - totalClicks, 0)}</strong> clics válidos antes de las 12:00 AM</p>
         </div>
@@ -248,7 +248,7 @@ function DashboardPage() {
         </div>
         <div className="bg-[#0F1523] border border-white/5 rounded-2xl p-3">
           <div className="bg-blue-500/10 p-1.5 rounded-lg w-fit mb-2"><TrendingUp className="w-4 h-4 text-blue-500" /></div>
-          <h4 className="text-lg font-black text-white">$17.50</h4>
+          <h4 className="text-lg font-black text-white">${globalSettings.ecpmBase.toFixed(2)}</h4>
           <p className="text-[10px] text-slate-400 mt-0.5">eCPM</p>
         </div>
       </div>

@@ -14,8 +14,10 @@ import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as MfaRouteImport } from './routes/mfa'
+import { Route as PrivacidadRouteImport } from './routes/privacidad'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as TerminosRouteImport } from './routes/terminos'
 import { Route as AuthedAdminRouteImport } from './routes/_authed/admin'
 import { Route as AuthedAdminComunicacionesRouteImport } from './routes/_authed/admin-comunicaciones'
 import { Route as AuthedAdminComunidadRouteImport } from './routes/_authed/admin-comunidad'
@@ -70,6 +72,11 @@ const MfaRoute = MfaRouteImport.update({
   path: '/mfa',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivacidadRoute = PrivacidadRouteImport.update({
+  id: '/privacidad',
+  path: '/privacidad',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
@@ -78,6 +85,11 @@ const RegisterRoute = RegisterRouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TerminosRoute = TerminosRouteImport.update({
+  id: '/terminos',
+  path: '/terminos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthedAdminRoute = AuthedAdminRouteImport.update({
@@ -233,8 +245,10 @@ export interface FileRoutesByFullPath {
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/mfa': typeof MfaRoute
+  '/privacidad': typeof PrivacidadRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/terminos': typeof TerminosRoute
   '/admin': typeof AuthedAdminRoute
   '/admin-comunicaciones': typeof AuthedAdminComunicacionesRoute
   '/admin-comunidad': typeof AuthedAdminComunidadRoute
@@ -270,8 +284,10 @@ export interface FileRoutesByTo {
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/mfa': typeof MfaRoute
+  '/privacidad': typeof PrivacidadRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/terminos': typeof TerminosRoute
   '/admin': typeof AuthedAdminRoute
   '/admin-comunicaciones': typeof AuthedAdminComunicacionesRoute
   '/admin-comunidad': typeof AuthedAdminComunidadRoute
@@ -309,8 +325,10 @@ export interface FileRoutesById {
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/mfa': typeof MfaRoute
+  '/privacidad': typeof PrivacidadRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/terminos': typeof TerminosRoute
   '/_authed/admin': typeof AuthedAdminRoute
   '/_authed/admin-comunicaciones': typeof AuthedAdminComunicacionesRoute
   '/_authed/admin-comunidad': typeof AuthedAdminComunidadRoute
@@ -348,8 +366,10 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/login'
     | '/mfa'
+    | '/privacidad'
     | '/register'
     | '/reset-password'
+    | '/terminos'
     | '/admin'
     | '/admin-comunicaciones'
     | '/admin-comunidad'
@@ -385,8 +405,10 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/login'
     | '/mfa'
+    | '/privacidad'
     | '/register'
     | '/reset-password'
+    | '/terminos'
     | '/admin'
     | '/admin-comunicaciones'
     | '/admin-comunidad'
@@ -423,8 +445,10 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/login'
     | '/mfa'
+    | '/privacidad'
     | '/register'
     | '/reset-password'
+    | '/terminos'
     | '/_authed/admin'
     | '/_authed/admin-comunicaciones'
     | '/_authed/admin-comunidad'
@@ -462,8 +486,10 @@ export interface RootRouteChildren {
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
   MfaRoute: typeof MfaRoute
+  PrivacidadRoute: typeof PrivacidadRoute
   RegisterRoute: typeof RegisterRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  TerminosRoute: typeof TerminosRoute
   ApiTimeRoute: typeof ApiTimeRoute
   ApiValidateRoute: typeof ApiValidateRoute
   GetkeyIdRoute: typeof GetkeyIdRoute
@@ -508,6 +534,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MfaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/privacidad': {
+      id: '/privacidad'
+      path: '/privacidad'
+      fullPath: '/privacidad'
+      preLoaderRoute: typeof PrivacidadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/register': {
       id: '/register'
       path: '/register'
@@ -520,6 +553,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terminos': {
+      id: '/terminos'
+      path: '/terminos'
+      fullPath: '/terminos'
+      preLoaderRoute: typeof TerminosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authed/admin': {
@@ -791,8 +831,10 @@ const rootRouteChildren: RootRouteChildren = {
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
   MfaRoute: MfaRoute,
+  PrivacidadRoute: PrivacidadRoute,
   RegisterRoute: RegisterRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  TerminosRoute: TerminosRoute,
   ApiTimeRoute: ApiTimeRoute,
   ApiValidateRoute: ApiValidateRoute,
   GetkeyIdRoute: GetkeyIdRoute,

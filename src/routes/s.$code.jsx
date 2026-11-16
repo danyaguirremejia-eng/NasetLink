@@ -14,7 +14,6 @@ function RedirectPage() {
   useEffect(() => {
     const redirect = async () => {
       try {
-        // 1. Buscar el link
         const q = query(collection(db, "links"), where("short_code", "==", code));
         const snap = await getDocs(q);
 
@@ -25,26 +24,25 @@ function RedirectPage() {
 
         const linkDoc = snap.docs[0];
         const linkData = linkDoc.data();
-
-        // 2. Sumar el clic
-        await updateDoc(doc(db, "links", linkDoc.id), { clicks: increment(1) });
         
         setStatus("Generando pasos de seguridad...");
         
-        // 3. Llamar a GPLinks DIRECTO desde aquí
         const apiToken = "773d3c79ed712d7b6faf6f568293fd7d84e93fad";
-        const gplinksUrl = `https://api.gplinks.com/api?api=${apiToken}&url=${encodeURIComponent(linkData.original_url)}`;
+        // Le pasamos nuestro propio código (alias) a GPLinks para que nos avise cuando gane dinero
+        const gplinksUrl = `https://api.gplinks.com/api?api=${apiToken}&url=${encodeURIComponent(linkData.original_url)}&alias=${linkData.short_code}`;
         
         const response = await fetch(gplinksUrl);
         const data = await response.json();
 
         if (data.status === 'success' && data.shortenedUrl) {
           setStatus("Redirigiendo...");
+          // SOLO SUMAMOS EL CLIC AQUÍ (las ganancias las suma GPLinks después)
+          await updateDoc(doc(db, "links", linkDoc.id), { clicks: increment(1) });
+          
           setTimeout(() => {
             window.location.href = data.shortenedUrl;
           }, 800);
         } else {
-          // Si GPLinks falla, lo mandamos directo al destino para no romper el link
           console.log("Error GPLinks:", data);
           window.location.href = linkData.original_url;
         }

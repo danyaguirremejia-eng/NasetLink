@@ -9,11 +9,12 @@ export const Route = createFileRoute('/s/$code')({
 
 function RedirectPage() {
   const { code } = Route.useParams()
-  const [status, setStatus] = useState("Verificando enlace...")
+  const [status, setStatus] = useState("Preparando tu enlace seguro...")
 
   useEffect(() => {
     const redirect = async () => {
       try {
+        // 1. Buscar el link en Firestore
         const q = query(collection(db, "links"), where("short_code", "==", code));
         const snap = await getDocs(q);
 
@@ -24,44 +25,28 @@ function RedirectPage() {
 
         const linkDoc = snap.docs[0];
         const linkData = linkDoc.data();
-        const userRef = doc(db, "users", linkData.userId);
 
-        // Detectar Dispositivo
-        const ua = navigator.userAgent;
-        let device = "Desktop";
-        if (/android/i.test(ua)) device = "Android";
-        else if (/iPad|iPhone|iPod/.test(ua)) device = "iOS";
+        // 2. Sumar el clic en tu base de datos
+        await updateDoc(doc(db, "links", linkDoc.id), {
+          clicks: increment(1)
+        });
 
-        // Detectar País (Usando una API gratuita)
-        let country = "Desconocido";
-        try {
-          const res = await fetch('https://ipapi.co/json/');
-          const data = await res.json();
-          country = data.country_name || "Desconocido";
-        } catch (err) {
-          console.log("No se pudo obtener el país");
-        }
-
-        // Actualizar clics en el link y en el perfil del usuario
-        await updateDoc(doc(db, "links", linkDoc.id), { clicks: increment(1) });
+        setStatus("Generando pasos de seguridad...");
         
-        try {
-          await updateDoc(userRef, {
-            [`stats.devices.${device}`]: increment(1),
-            [`stats.countries.${country}`]: increment(1)
-          });
-        } catch (e) {
-            // Si el campo no existe, lo creamos (Firebase a veces requiere inicializar)
-            await updateDoc(userRef, {
-                stats: { devices: { [device]: 1 }, countries: { [country]: 1 } }
-            });
-        }
+        // 3. Pedirle a nuestro servidor que acorte el link con GPLinks
+        const response = await fetch(`/api/shorten?url=${encodeURIComponent(linkData.original_url)}`);
+        const data = await response.json();
 
-        setStatus("Redirigiendo...");
-        
-        setTimeout(() => {
-          window.location.href = linkData.original_url; 
-        }, 1500);
+        if (data.url) {
+          // 4. Mandamos al usuario a GPLinks
+          setStatus("Redirigiendo...");
+          setTimeout(() => {
+            window.location.href = data.url;
+          }, 1000);
+        } else {
+          // Si GPLinks falla, lo mandamos directo al destino para no romper la experiencia
+          window.location.href = linkData.original_url;
+        }
 
       } catch (error) {
         console.error(error);
@@ -74,7 +59,7 @@ function RedirectPage() {
 
   return (
     <div className="min-h-screen bg-[#0B0F19] flex flex-col items-center justify-center text-white">
-      <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mb-4 animate-pulse">
+      <div className="w-16 h-16 bg-purple-600 rounded-2xl flex items-center justify-center mb-4 animate-pulse">
         <span className="font-bold text-2xl">NS</span>
       </div>
       <h1 className="text-xl font-bold">{status}</h1>

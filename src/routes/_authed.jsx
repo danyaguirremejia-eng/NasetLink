@@ -7,6 +7,11 @@ import { db, auth } from "@/lib/firebase";
 import { doc, onSnapshot, getDoc } from "firebase/firestore";
 import { ShieldAlert } from "lucide-react";
 
+// ⬇️ TUS CORREOS DE STAFF AQUÍ ⬇️
+const OWNER_EMAILS = ["danyxiter67@gmail.com"];
+const MODERATOR_EMAILS = ["moderador@ejemplo.com"];
+const ADMIN_EMAILS = ["admin@ejemplo.com"];
+
 export const Route = createFileRoute("/_authed")({
   ssr: false,
   beforeLoad: requireSignedIn,
@@ -21,22 +26,36 @@ function AuthedLayout() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 1. Escuchar si el modo mantenimiento está activo en tiempo real
+    // 1. Escuchar si el modo mantenimiento está activo
     const unsubSettings = onSnapshot(doc(db, "settings", "global"), (docSnap) => {
       if (docSnap.exists()) {
         setMaintenance(docSnap.data().maintenance || false);
       }
     });
 
-    // 2. Revisar si el usuario actual es del staff (para dejarlo pasar)
+    // 2. Revisar si el usuario actual es del staff
     const checkRole = async () => {
       if (auth.currentUser) {
-        const userDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
-        if (userDoc.exists()) {
-          const role = userDoc.data().role;
-          if (role === 'owner' || role === 'admin' || role === 'moderator') {
-            setIsStaff(true);
+        const userEmail = auth.currentUser.email;
+        
+        // Primero revisamos si el correo está en las listas de arriba
+        if (OWNER_EMAILS.includes(userEmail) || MODERATOR_EMAILS.includes(userEmail) || ADMIN_EMAILS.includes(userEmail)) {
+          setIsStaff(true);
+          setLoading(false);
+          return;
+        }
+
+        // Si no está en las listas, revisamos en Firestore
+        try {
+          const userDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
+          if (userDoc.exists()) {
+            const role = userDoc.data().role;
+            if (role === 'owner' || role === 'admin' || role === 'moderator') {
+              setIsStaff(true);
+            }
           }
+        } catch (e) {
+          console.log("Error verificando rol", e);
         }
       }
       setLoading(false);
@@ -48,7 +67,7 @@ function AuthedLayout() {
 
   if (loading) return <LoadingScreen />;
 
-  // Si el modo mantenimiento está activo Y NO eres del staff, te bloquea
+  // Si está en mantenimiento y NO es del staff, lo bloquea
   if (maintenance && !isStaff) {
     return (
       <div className="min-h-screen bg-[#0B0F19] flex flex-col items-center justify-center text-white p-5 text-center">

@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { 
   User, LogOut, Lock, Save, ChevronDown, Image as ImageIcon, Upload, 
   Phone, Globe, Video, Eye, Crown, Wallet, Ghost, Smile, Gamepad2, 
-  Rocket, Shield, Zap, Star, Heart, Skull, Bot, Cat 
+  Rocket, Shield, Zap, Star, Heart, Skull, Bot, Cat, Link as LinkIcon, Copy 
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authed/perfil")({

@@ -44,6 +44,7 @@ import { Route as ApiTimeRouteImport } from './routes/api/time'
 import { Route as ApiValidateRouteImport } from './routes/api/validate'
 import { Route as GetkeyIdRouteImport } from './routes/getkey.$id'
 import { Route as SCodeRouteImport } from './routes/s.$code'
+import { Route as UUidRouteImport } from './routes/u.$uid'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -221,6 +222,11 @@ const SCodeRoute = SCodeRouteImport.update({
   path: '/s/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UUidRoute = UUidRouteImport.update({
+  id: '/u/$uid',
+  path: '/u/$uid',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -257,6 +263,7 @@ export interface FileRoutesByFullPath {
   '/api/validate': typeof ApiValidateRoute
   '/getkey/$id': typeof GetkeyIdRoute
   '/s/$code': typeof SCodeRoute
+  '/u/$uid': typeof UUidRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -293,6 +300,7 @@ export interface FileRoutesByTo {
   '/api/validate': typeof ApiValidateRoute
   '/getkey/$id': typeof GetkeyIdRoute
   '/s/$code': typeof SCodeRoute
+  '/u/$uid': typeof UUidRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -331,6 +339,7 @@ export interface FileRoutesById {
   '/api/validate': typeof ApiValidateRoute
   '/getkey/$id': typeof GetkeyIdRoute
   '/s/$code': typeof SCodeRoute
+  '/u/$uid': typeof UUidRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -369,6 +378,7 @@ export interface FileRouteTypes {
     | '/api/validate'
     | '/getkey/$id'
     | '/s/$code'
+    | '/u/$uid'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -405,6 +415,7 @@ export interface FileRouteTypes {
     | '/api/validate'
     | '/getkey/$id'
     | '/s/$code'
+    | '/u/$uid'
   id:
     | '__root__'
     | '/'
@@ -442,6 +453,7 @@ export interface FileRouteTypes {
     | '/api/validate'
     | '/getkey/$id'
     | '/s/$code'
+    | '/u/$uid'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -456,6 +468,7 @@ export interface RootRouteChildren {
   ApiValidateRoute: typeof ApiValidateRoute
   GetkeyIdRoute: typeof GetkeyIdRoute
   SCodeRoute: typeof SCodeRoute
+  UUidRoute: typeof UUidRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -705,6 +718,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/u/$uid': {
+      id: '/u/$uid'
+      path: '/u/$uid'
+      fullPath: '/u/$uid'
+      preLoaderRoute: typeof UUidRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -777,6 +797,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiValidateRoute: ApiValidateRoute,
   GetkeyIdRoute: GetkeyIdRoute,
   SCodeRoute: SCodeRoute,
+  UUidRoute: UUidRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

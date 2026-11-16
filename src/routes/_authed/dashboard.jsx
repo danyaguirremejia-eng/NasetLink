@@ -18,11 +18,11 @@ function DashboardPage() {
   const [links, setLinks] = useState([]);
   const [balance, setBalance] = useState(0);
   const [totalEarnings, setTotalEarnings] = useState(0);
+  const [totalClicks, setTotalClicks] = useState(0);
   const [loadingData, setLoadingData] = useState(true);
   const [userData, setUserData] = useState(null);
   const [globalSettings, setGlobalSettings] = useState({ ecpmBase: 1.5 });
   
-  // Estados para los filtros
   const [activeTab, setActiveTab] = useState("Hoy");
   const [filteredClicks, setFilteredClicks] = useState(0);
   const [filteredEarnings, setFilteredEarnings] = useState(0);
@@ -44,23 +44,38 @@ function DashboardPage() {
     const fetchData = async () => {
       setLoadingData(true);
       try {
-        // 1. Cargar links
+        // 1. Cargar links (ganancias históricas)
         const q = query(collection(db, "links"), where("userId", "==", user.uid));
         const querySnapshot = await getDocs(q);
         let fetchedLinks = [];
+        let tClicks = 0;
         let tEarnings = 0;
 
         querySnapshot.forEach((doc) => {
           const data = doc.data();
           fetchedLinks.push({ id: doc.id, ...data });
+          tClicks += data.clicks || 0;
           tEarnings += data.earnings || 0;
         });
 
         setLinks(fetchedLinks.reverse());
+        setTotalClicks(tClicks);
         setTotalEarnings(tEarnings);
-        setBalance(tEarnings);
 
-        // 2. Cargar historial de clics para los filtros
+        // 2. Cargar retiros para calcular el saldo REAL
+        const wq = query(collection(db, "withdrawals"), where("userId", "==", user.uid));
+        const wSnap = await getDocs(wq);
+        let withdrawnTotal = 0;
+        wSnap.forEach(doc => {
+          const wData = doc.data();
+          if (wData.status === 'pending' || wData.status === 'paid') {
+            withdrawnTotal += wData.amount;
+          }
+        });
+        
+        setBalance(Math.max(0, tEarnings - withdrawnTotal)); // Saldo Real
+
+        // 3. Cargar historial de clics para los filtros
         const logsQ = query(collection(db, "click_logs"), where("userId", "==", user.uid));
         const logsSnap = await getDocs(logsQ);
         let logsList = [];
@@ -79,7 +94,6 @@ function DashboardPage() {
     return () => { unsubUser(); unsubSettings(); };
   }, [user]);
 
-  // Efecto que se ejecuta cada vez que cambias de pestaña o llegan nuevos logs
   useEffect(() => {
     const now = new Date();
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
@@ -107,7 +121,6 @@ function DashboardPage() {
 
     setFilteredClicks(clicks);
     setFilteredEarnings(earnings);
-
   }, [activeTab, clickLogs]);
 
   const handleCopy = async (text) => {
@@ -127,13 +140,10 @@ function DashboardPage() {
   const isInfluencer = userData?.role === 'influencer';
   const domain = window.location.origin;
 
-  if (loadingData) {
-    return <div className="text-center text-white mt-10 font-bold">Cargando NASETLINK...</div>;
-  }
+  if (loadingData) return <div className="text-center text-white mt-10 font-bold">Cargando NASETLINK...</div>;
 
   return (
     <div className="space-y-6 pb-6 relative">
-      
       {showPromo && (
         <div className="relative bg-[#0F1523]/60 backdrop-blur-xl border border-green-500/20 rounded-3xl p-5 flex items-start gap-4 shadow-lg">
           <div className="bg-green-500/10 p-2.5 rounded-xl text-green-500 shrink-0"><MessageCircle className="w-6 h-6" /></div>
@@ -156,16 +166,12 @@ function DashboardPage() {
       </div>
 
       <div>
-        <div className="flex items-center gap-2 mb-3">
-          <div className="w-1 h-4 bg-purple-500 rounded-full"></div>
-          <h2 className="font-bold text-lg text-white">Resumen</h2>
-        </div>
-
+        <div className="flex items-center gap-2 mb-3"><div className="w-1 h-4 bg-purple-500 rounded-full"></div><h2 className="font-bold text-lg text-white">Resumen</h2></div>
         <div className="bg-gradient-to-br from-purple-700 to-indigo-900 rounded-3xl p-6 shadow-2xl relative overflow-hidden mb-4 border border-white/10">
           <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
           <div className="flex justify-between items-start mb-6 relative z-10">
             <div className="flex items-center gap-2 text-purple-100"><Wallet className="w-5 h-5" /><span className="text-sm font-medium">Tu saldo</span></div>
-            <span className="bg-white/10 border border-white/20 text-white text-xs font-bold px-3 py-1 rounded-full backdrop-blur-md">Histórico</span>
+            <span className="bg-white/10 border border-white/20 text-white text-xs font-bold px-3 py-1 rounded-full backdrop-blur-md">Disponible</span>
           </div>
           <h3 className="text-5xl font-black mb-6 relative z-10">${balance.toFixed(2)}</h3>
           <div className="space-y-3 mb-6 relative z-10">
@@ -199,12 +205,8 @@ function DashboardPage() {
             <p className="font-bold text-sm text-white">Día 1/9</p>
           </div>
         </div>
-
         <div className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span className="text-slate-400">Hoy llevas</span>
-            <span className="text-slate-400">Para subir a <strong className="text-white">LEVEL {userLevel + 1}</strong></span>
-          </div>
+          <div className="flex justify-between text-sm"><span className="text-slate-400">Hoy llevas</span><span className="text-slate-400">Para subir a <strong className="text-white">LEVEL {userLevel + 1}</strong></span></div>
           <div className="flex justify-between items-end mb-1">
             <span className="text-3xl font-black text-white">{filteredClicks} <span className="text-lg text-slate-500 font-medium">/ 300</span></span>
             <span className="text-xs text-slate-400 font-medium">300/día × 9 días</span>
@@ -214,7 +216,6 @@ function DashboardPage() {
           </div>
           <p className="text-xs text-slate-400 mt-3">Te faltan <strong className="text-white">{Math.max(300 - filteredClicks, 0)}</strong> clics válidos antes de las 12:00 AM</p>
         </div>
-        
         <div className="flex gap-1.5 mt-5">
           {[1,2,3,4,5,6,7,8,9].map(i => (
             <div key={i} className={`flex-1 aspect-square flex items-center justify-center rounded-lg border text-xs font-bold ${i === 1 ? 'border-purple-500 bg-purple-500/10 text-purple-400' : 'border-white/5 bg-white/5 text-slate-500'}`}>{i}</div>
@@ -222,35 +223,16 @@ function DashboardPage() {
         </div>
       </div>
 
-      {/* BOTONES DE FILTRO FUNCIONALES */}
       <div className="grid grid-cols-4 gap-2 bg-[#0F1523]/60 backdrop-blur-xl p-1.5 rounded-2xl border border-white/5 shadow-lg">
         {['Hoy', 'Ayer', 'Este mes', 'Mes ant.'].map((tab) => (
-          <button 
-            key={tab} 
-            onClick={() => setActiveTab(tab)}
-            className={`py-2 text-[11px] font-semibold rounded-xl transition ${activeTab === tab ? 'bg-purple-600 text-white shadow-md' : 'text-slate-400 hover:text-white'}`}
-          >
-            {tab}
-          </button>
+          <button key={tab} onClick={() => setActiveTab(tab)} className={`py-2 text-[11px] font-semibold rounded-xl transition ${activeTab === tab ? 'bg-purple-600 text-white shadow-md' : 'text-slate-400 hover:text-white'}`}>{tab}</button>
         ))}
       </div>
       
       <div className="grid grid-cols-3 gap-3">
-        <div className="bg-[#0F1523]/60 backdrop-blur-xl border border-white/5 rounded-3xl p-4 shadow-lg">
-          <div className="bg-purple-500/10 p-2 rounded-xl w-fit mb-3"><Wallet className="w-4 h-4 text-purple-500" /></div>
-          <h4 className="text-xl font-black text-white">${filteredEarnings.toFixed(2)}</h4>
-          <p className="text-[10px] text-slate-400 mt-0.5">Ganancias</p>
-        </div>
-        <div className="bg-[#0F1523]/60 backdrop-blur-xl border border-white/5 rounded-3xl p-4 shadow-lg">
-          <div className="bg-purple-500/10 p-2 rounded-xl w-fit mb-3"><TrendingUp className="w-4 h-4 text-purple-500" /></div>
-          <h4 className="text-xl font-black text-white">{filteredClicks}</h4>
-          <p className="text-[10px] text-slate-400 mt-0.5">Clics</p>
-        </div>
-        <div className="bg-[#0F1523]/60 backdrop-blur-xl border border-white/5 rounded-3xl p-4 shadow-lg">
-          <div className="bg-purple-500/10 p-2 rounded-xl w-fit mb-3"><TrendingUp className="w-4 h-4 text-purple-500" /></div>
-          <h4 className="text-xl font-black text-white">${globalSettings.ecpmBase.toFixed(2)}</h4>
-          <p className="text-[10px] text-slate-400 mt-0.5">eCPM</p>
-        </div>
+        <div className="bg-[#0F1523]/60 backdrop-blur-xl border border-white/5 rounded-3xl p-4 shadow-lg"><div className="bg-purple-500/10 p-2 rounded-xl w-fit mb-3"><Wallet className="w-4 h-4 text-purple-500" /></div><h4 className="text-xl font-black text-white">${filteredEarnings.toFixed(2)}</h4><p className="text-[10px] text-slate-400 mt-0.5">Ganancias</p></div>
+        <div className="bg-[#0F1523]/60 backdrop-blur-xl border border-white/5 rounded-3xl p-4 shadow-lg"><div className="bg-purple-500/10 p-2 rounded-xl w-fit mb-3"><TrendingUp className="w-4 h-4 text-purple-500" /></div><h4 className="text-xl font-black text-white">{filteredClicks}</h4><p className="text-[10px] text-slate-400 mt-0.5">Clics</p></div>
+        <div className="bg-[#0F1523]/60 backdrop-blur-xl border border-white/5 rounded-3xl p-4 shadow-lg"><div className="bg-purple-500/10 p-2 rounded-xl w-fit mb-3"><TrendingUp className="w-4 h-4 text-purple-500" /></div><h4 className="text-xl font-black text-white">${globalSettings.ecpmBase.toFixed(2)}</h4><p className="text-[10px] text-slate-400 mt-0.5">eCPM</p></div>
       </div>
 
       <LinksTable links={links} onCopy={(link) => handleCopy(`${domain}/s/${link.short_code}`)} />

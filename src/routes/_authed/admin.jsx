@@ -3,7 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { db, auth } from "@/lib/firebase";
 import { collection, getDocs, doc, updateDoc, addDoc, deleteDoc, serverTimestamp, query, orderBy, onSnapshot, limit } from "firebase/firestore";
 import { toast } from "sonner";
-import { ShieldAlert, Search, CheckCircle2, BadgeCheck, Star, Ban, Loader2, Megaphone, Send, MessageSquare, Minus, Plus, DollarSign, Mail, Shield, ShieldCheck, Wallet, History } from "lucide-react";
+import { ShieldAlert, Search, CheckCircle2, BadgeCheck, Star, Ban, Loader2, Megaphone, Send, MessageSquare, Minus, Plus, DollarSign, Mail, Phone, Shield, ShieldCheck, Wallet, History } from "lucide-react";
 
 export const Route = createFileRoute("/_authed/admin")({
   head: () => ({ meta: [{ title: "Admin Panel — NASETLINK" }] }),

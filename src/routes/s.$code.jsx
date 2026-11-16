@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { db } from '@/lib/firebase'
-import { collection, query, where, getDocs, updateDoc, doc, increment } from 'firebase/firestore'
+import { collection, query, where, getDocs, updateDoc, doc, increment, getDoc } from 'firebase/firestore'
 
 export const Route = createFileRoute('/s/$code')({
   component: RedirectPage,
@@ -14,6 +14,7 @@ function RedirectPage() {
   useEffect(() => {
     const redirect = async () => {
       try {
+        // 1. Buscar el link
         const q = query(collection(db, "links"), where("short_code", "==", code));
         const snap = await getDocs(q);
 
@@ -24,26 +25,44 @@ function RedirectPage() {
 
         const linkDoc = snap.docs[0];
         const linkData = linkDoc.data();
+
+        // 2. Obtener el eCPM configurado en el admin
+        const settingsSnap = await getDoc(doc(db, "settings", "global"));
+        let ecpmActual = 0.70; 
+        if (settingsSnap.exists() && settingsSnap.data().ecpmBase) {
+          ecpmActual = settingsSnap.data().ecpmBase;
+        }
+
+        const gananciaPorClic = ecpmActual / 1000;
+
+        // 3. Sumar clic y ganancia
+        await updateDoc(doc(db, "links", linkDoc.id), { 
+          clicks: increment(1),
+          earnings: increment(gananciaPorClic) 
+        });
+
+        if (linkData.userId) {
+           await updateDoc(doc(db, "users", linkData.userId), {
+             earnings: increment(gananciaPorClic)
+           });
+        }
         
         setStatus("Generando pasos de seguridad...");
         
-        const apiToken = "773d3c79ed712d7b6faf6f568293fd7d84e93fad";
-        // Le pasamos nuestro propio código (alias) a GPLinks para que nos avise cuando gane dinero
-        const gplinksUrl = `https://api.gplinks.com/api?api=${apiToken}&url=${encodeURIComponent(linkData.original_url)}&alias=${linkData.short_code}`;
+        // 4. Llamar a la API de ShrinkMe
+        const apiToken = "0f4d59d395c5b5d4f2a7d86a5997f2bf2674c4b7";
+        const shrinkmeUrl = `https://shrinkme.io/api?api=${apiToken}&url=${encodeURIComponent(linkData.original_url)}&alias=${linkData.short_code}`;
         
-        const response = await fetch(gplinksUrl);
+        const response = await fetch(shrinkmeUrl);
         const data = await response.json();
 
         if (data.status === 'success' && data.shortenedUrl) {
           setStatus("Redirigiendo...");
-          // SOLO SUMAMOS EL CLIC AQUÍ (las ganancias las suma GPLinks después)
-          await updateDoc(doc(db, "links", linkDoc.id), { clicks: increment(1) });
-          
           setTimeout(() => {
             window.location.href = data.shortenedUrl;
           }, 800);
         } else {
-          console.log("Error GPLinks:", data);
+          // Si falla, lo mandamos directo
           window.location.href = linkData.original_url;
         }
 
